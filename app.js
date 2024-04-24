@@ -2,11 +2,13 @@ const express = require('express');
 const app = express();
 const port = 8000; // different from TCP server
 
-let authorized = false; // This can be updated based on TCP server logic or via direct interaction
+app.use(express.static('path_to_your_html_css_js_files')); // Serve your static files
 
 app.get('/api/check-authorization', (req, res) => {
-    // Somehow interact with TCP server or use a shared status variable/resource
-    res.json({ authorized });
+    // Your existing logic here
+    res.json({ authorized: true });  // Example, adjust according to your logic
 });
 
-app.listen(port, () => console.log(`HTTP server running on port ${port}`));
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
