@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
 <body>
-    <h1>Welcome, <%= username %>!</h1>
+    <div class="container-fluid">
+        <div class="top-panel">
+            <div class="lab-vault">[Laboratory Vault] Authorized user: <%= username %></div>
+            <button class="logbutton" onclick="location.href='/logout'">Logout</button>
+        </div>
+        <div class="jumbotron bg-dark text-white">
+            <h1 class="display-4">Welcome, <%= username %>!</h1>
+            <p class="lead">This is your dashboard.</p>
+            <hr class="my-4">
+            <p>Use the navigation bar to access different sections of your dashboard.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Card title</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more cards as needed -->
+        </div>
+    </div>
 </body>
 </html>

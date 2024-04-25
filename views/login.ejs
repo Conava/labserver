@@ -13,15 +13,11 @@
         <input type="password" name="password" placeholder="Password">
         <div>
             <input type="submit" id="loginBtn" value="Login">
-            <input type="submit" id="registerBtn" value="Register">
         </div>
     </form>
     <script>
         document.getElementById('loginBtn').addEventListener('click', function() {
             document.getElementById('authForm').action = '/login';
-        });
-        document.getElementById('registerBtn').addEventListener('click', function() {
-            document.getElementById('authForm').action = '/register';
         });
     </script>
 </body>

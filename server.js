@@ -15,53 +15,81 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Home Page');
-});
-
 app.set('view engine', 'ejs');
 
 app.get('/', function(request, response) {
     response.render('login');
 });
+app.get('/login', function(req, res){
+  res.render('login');
+});
 
-app.post('/register', async (req, res) => {
+app.post('/login', async (req, res) => {
     try {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-      const user = { name: req.body.name, password: hashedPassword };
-      const data = JSON.parse(fs.readFileSync('users.json'));
-      data.users.push(user);
-      fs.writeFileSync('users.json', JSON.stringify(data));
-      res.status(201).send();
+        const data = JSON.parse(fs.readFileSync('users.json'));
+        const user = data.users.find(user => user.name === req.body.username);
+        if (user == null) {
+          return res.render('alert', { message: 'Username or password is incorrect' });
+        }
+        if (await bcrypt.compare(req.body.password, user.password)) {
+            req.session.user = user;
+            req.session.username = req.body.username;
+            req.session.loggedin = true; // Set loggedin to true
+            return res.redirect('/dashboard');
+        } else {
+          return res.render('alert', { message: 'Username or password is incorrect'});
+        }
     } catch {
-      res.status(500).send();
+        res.status(500).send();
     }
-  });
-
-  app.post('/login', (req, res) => {
-    const data = JSON.parse(fs.readFileSync('users.json'));
-    const user = data.users.find(user => user.name === req.body.name);
-    if (user == null) {
-      return res.status(400).send('Cannot find user');
-    }
-    try {
-      if (bcrypt.compareSync(req.body.password, user.password)) {
-        res.send('Success');
-      } else {
-        res.send('Not Allowed');
-      }
-    } catch {
-      res.status(500).send();
-    }
-  });
+});
 
 app.get('/dashboard', function(request, response) {
     if (request.session.loggedin) {
         response.render('dashboard', {username: request.session.username});
     } else {
-        response.send('Please login to view this page!');
+        response.redirect('/error');
     }
     response.end();
 });
 
-app.listen(3000);
+app.get('/error', function(req, res){
+  res.render('error');
+});
+
+// Create users.json file with hashed passwords.
+// Relocate to real database in production.
+async function createUsers() {
+  const users = [
+      { name: 'admin', password: 'nimda'},
+      { name: 'user1', password: 'password1' },
+      { name: 'user2', password: 'password2' },
+      { name: 'user3', password: 'password3' },
+      { name: 'user4', password: 'password4' },
+      { name: 'user5', password: 'password5' },
+  ];
+
+  const hashedUsers = await Promise.all(users.map(async user => {
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+      return { name: user.name, password: hashedPassword };
+  }));
+
+  fs.writeFileSync('users.json', JSON.stringify({ users: hashedUsers }));
+}
+
+createUsers();
+//End of createUsers
+
+app.get('/logout', function(req, res){
+  req.session.destroy(function(err) {
+      if(err) {
+          console.log(err);
+      } else {
+          res.redirect('/login');
+      }
+  });
+});
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
