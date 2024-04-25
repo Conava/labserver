@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laboratory Vault</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <form id="authForm" action="/login" method="POST">
+        <i class="fas fa-lock fa-3x"></i>
+        <h1>Laboratory Vault</h1>
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <div>
+            <input type="submit" id="loginBtn" value="Login">
+            <input type="submit" id="registerBtn" value="Register">
+        </div>
+    </form>
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            document.getElementById('authForm').action = '/login';
+        });
+        document.getElementById('registerBtn').addEventListener('click', function() {
+            document.getElementById('authForm').action = '/register';
+        });
+    </script>
+</body>
+</html>
