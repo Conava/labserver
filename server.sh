@@ -15,7 +15,7 @@ display_help() {
 start_server() {
     local port=${1:-443}  # Use the first argument as the port number, or 443 (80 without SSL certificate) if no argument is provided
     echo "Starting the server on port $port..."
-    nohup node server.sh.js $port > output.log 2>&1 &
+    nohup node server.sh "$port" > output.log 2>&1 &
     echo "Server started successfully on port $port."
     echo "Output is redirected to output.log."
 }
