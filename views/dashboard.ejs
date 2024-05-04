@@ -2,31 +2,59 @@
 <html>
 <head>
     <title>Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="db-container-fluid">
         <div class="top-panel">
-            <div class="lab-vault">[Laboratory Vault] Authorized user: <%= username %></div>
-            <button class="logbutton" onclick="location.href='/logout'">Logout</button>
+            <div class="lock-container">
+                <i class="fas fa-unlock fa-2x"></i>
+            </div>
+            <div class="logout-container">
+                <button class="logbutton" onclick="location.href='/logout'">Logout</button>
+            </div>
         </div>
-        <div class="jumbotron bg-dark text-white">
+        <div class="top-panel-text">
+            <div class="lab-vault">[[ <span class="lab">Laboratory Vault</span> ]] Authorized user: <span class="username"><%= username %></span></div></div>
+        <div class="db-jumbotron">
             <h1 class="display-4">Welcome, <%= username %>!</h1>
             <p class="lead">This is your dashboard.</p>
             <hr class="my-4">
             <p>Use the navigation bar to access different sections of your dashboard.</p>
         </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card bg-dark text-white">
+        <div class="db-row">
+            <div class="db-col">
+                <div class="db-card">
                     <div class="card-body">
-                        <h5 class="card-title">Card title</h5>
+                        <h5 class="card-title">Laboratory</h5>
                         <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                     </div>
                 </div>
             </div>
-            <!-- Add more cards as needed -->
+            <div class="db-col">
+               <div class="db-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Source Code</h5>
+                        <p class="card-text">All our source code for building the project</p>
+                        <div class="link-group">
+                            <div class="button-container">
+                                <a href="#" class="card-link">Webserver</a>
+                                <a href="#" class="card-link">Coralmicro Code</a>
+                                <a href="#" class="card-link">Tensorflow Model</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-col">
+                <div class="db-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Explanation</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

@@ -24,23 +24,20 @@ app.get('/login', function(req, res){
   res.render('login');
 });
 
-app.post('/login', async (req, res) => {
-    try {
-        const data = JSON.parse(fs.readFileSync('users.json'));
-        const user = data.users.find(user => user.name === req.body.username);
-        if (user == null) {
-          return res.render('alert', { message: 'Username or password is incorrect' });
-        }
-        if (await bcrypt.compare(req.body.password, user.password)) {
-            req.session.user = user;
-            req.session.username = req.body.username;
-            req.session.loggedin = true; // Set loggedin to true
-            return res.redirect('/dashboard');
-        } else {
-          return res.render('alert', { message: 'Username or password is incorrect'});
-        }
-    } catch {
-        res.status(500).send();
+app.post('/login', async function(req, res) {
+    const { username, password } = req.body;
+    const users = JSON.parse(fs.readFileSync('users.json')).users;
+    const user = users.find(user => user.name === username);
+    if (user && await bcrypt.compare(password, user.password)) {
+        // If the credentials are correct, start a session and redirect to the dashboard
+        req.session.userId = user.id;
+        req.session.loggedin = true; // set session.loggedin to true
+        req.session.username = username; // store the username in the session
+
+        res.redirect('/dashboard');
+    } else {
+        // If the credentials are incorrect, send a response with status 401 (Unauthorized)
+        res.status(401).send('Incorrect credentials');
     }
 });
 
@@ -61,12 +58,12 @@ app.get('/error', function(req, res){
 // Relocate to real database in production.
 async function createUsers() {
   const users = [
-      { name: 'admin', password: 'nimda'},
-      { name: 'user1', password: 'password1' },
-      { name: 'user2', password: 'password2' },
-      { name: 'user3', password: 'password3' },
-      { name: 'user4', password: 'password4' },
-      { name: 'user5', password: 'password5' },
+      { name: 'Admin', password: 'nimdA'},
+      { name: 'Marlon', password: 'nimdA' },
+      { name: 'Silas', password: 'nimdA' },
+      { name: 'Laurin', password: 'nimdA' },
+      { name: 'Oskar', password: 'nimdA' },
+      { name: 'Ludwig', password: 'nimdA' },
   ];
 
   const hashedUsers = await Promise.all(users.map(async user => {
@@ -76,7 +73,6 @@ async function createUsers() {
 
   fs.writeFileSync('users.json', JSON.stringify({ users: hashedUsers }));
 }
-
 createUsers();
 //End of createUsers
 
