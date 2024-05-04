@@ -19,6 +19,12 @@ start_server() {
         exit 1
     fi
 
+    # Check if the server is already running
+    if pgrep -f "node server.js" > /dev/null; then
+        echo "The server is already running."
+        exit 1
+    fi
+
     local port=${1:-443}  # Use the first argument as the port number, or 443 (80 without SSL certificate) if no argument is provided
     echo "Starting the server on port $port..."
     nohup node server.js "$port" > output.log 2>&1 &
