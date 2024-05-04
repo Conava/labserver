@@ -43,7 +43,7 @@
         body: new URLSearchParams(new FormData(event.target))
     }).then(function(response) {
         if (response.status === 401) {
-            // If the server responded with status 401, show the popup
+            // If the server.sh responded with status 401, show the popup
             document.getElementById('popup').classList.remove('hidden');
             document.getElementById('overlay').classList.remove('hidden');
 
@@ -51,7 +51,7 @@
             document.querySelector('input[name="password"]').value = '';
             checkInput();
         } else {
-            // If the server responded with a different status, redirect to the response URL
+            // If the server.sh responded with a different status, redirect to the response URL
             window.location.href = response.url;
         }
     });

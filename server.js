@@ -1,8 +1,30 @@
 const express = require('express');
 const session = require('express-session');
+const https = require('https');
+const http = require('http');
+const fs = require('fs');
 const app = express();
 const bcrypt = require('bcrypt');
-const fs = require('fs');
+const port = process.argv[2] || 443;
+
+let server;
+
+try {
+    // Try to read the SSL certificate and private key
+    const options = {
+        key: fs.readFileSync('key.pem'),
+        cert: fs.readFileSync('cert.pem'),
+        passphrase: 'laboratory' // Replace with the passphrase you used when generating the private key
+    };
+
+    // Create an HTTPS server.sh
+    server = https.createServer(options, app);
+} catch (error) {
+    // If an error occurs, print a warning and fall back to the HTTP server.sh
+    console.warn('Warning: SSL certificate not found. Falling back to the HTTP server.sh.');
+    server = http.createServer(app);
+}
+
 
 app.use(session({
     secret: 'secret',
@@ -86,6 +108,7 @@ app.get('/logout', function(req, res){
   });
 });
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+// Start the server.sh
+server.listen(port, () => {
+    console.log(`HTTPS server is running on port ${port}`);
 });

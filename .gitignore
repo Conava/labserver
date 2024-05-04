@@ -1,3 +1,6 @@
 users.json
 /.idea/
 /node_modules/
+/output.log
+/key.pem
+/cert.pem
