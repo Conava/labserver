@@ -19,6 +19,13 @@ try {
 
     // Create an HTTPS server.sh
     server = https.createServer(options, app);
+
+    // Create an HTTP server
+    http.createServer(function (req, res) {
+        // Set the response header to a 301 redirect (Moved Permanently)
+        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+        res.end();
+    }).listen(80);
 } catch (error) {
     // If an error occurs, print a warning and fall back to the HTTP server.sh
     console.warn('Warning: SSL certificate not found. Falling back to the HTTP server.sh.');
