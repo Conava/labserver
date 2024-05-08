@@ -90,7 +90,7 @@ button#loginBtn:disabled:hover span:after {
     right: -100px; /* move the arrow outside the button */
     opacity: 0; /* hide the arrow */
 }
-#popup {
+.popup {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -102,8 +102,14 @@ button#loginBtn:disabled:hover span:after {
     width: 15%; /* decrease width to make the popup smaller */
     height: 15%; /* decrease height to make the popup smaller */
 }
+@media screen and (max-width: 1920px) {
+    .popup {
+        width: 30%; /* increase width for screens smaller than or equal to Full HD */
+        height: 30%; /* increase height for screens smaller than or equal to Full HD */
+    }
+}
 
-#popupHeader {
+.popupHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -114,11 +120,11 @@ button#loginBtn:disabled:hover span:after {
     border-radius: 20px 20px 0 0; /* rounded corners at the top */
     box-sizing: border-box; /* ensure padding doesn't increase element size */
 }
-#popup p {
+.popup p {
     padding: 30px;
     box-sizing: border-box; /* ensure padding doesn't increase element size */
 }
-#closePopup {
+.closeButton {
     color: #FFFFFF; /* white */
     font-size: 1em; /* make it bigger */
     background-color: #444444; /* slightly lighter than the popup background */

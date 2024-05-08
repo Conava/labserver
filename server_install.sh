@@ -10,6 +10,7 @@ check_ssl_certificates() {
                 echo "Generating new certificates..."
                 openssl genrsa -out key.pem 2048
                 openssl req -new -x509 -key key.pem -out cert.pem -days 365
+                echo "Certificates generated successfully."
                 ;;
             n|N )
                 echo "Not generating new certificates."
@@ -25,24 +26,36 @@ check_ssl_certificates() {
 }
 # Function to install packages on Debian
 install_debian() {
+    echo "Updating package list..."
     sudo apt-get update
+    echo "Installing nodejs and npm..."
     sudo apt-get install -y nodejs npm
+    echo "Installing npm packages..."
     npm install bcrypt ejs express express-session fs
+    echo "All packages installed successfully."
 }
 
 # Function to install packages on Arch
 install_arch() {
+    echo "Updating package list..."
     sudo pacman -Syu
+    echo "Installing nodejs and npm..."
     sudo pacman -S nodejs npm
+    echo "Installing npm packages..."
     npm install bcrypt ejs express express-session fs
+    echo "All packages installed successfully."
 }
 
 # Function to install packages on macOS
 install_macos() {
+    Check if homebrew is installed
     # Uncomment the line below if homebrew is not installed
     #/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo "Installing nodejs and npm..."
     brew install nodejs npm
+    echo "Installing npm packages..."
     npm install bcrypt ejs express express-session fs
+    echo "All packages installed successfully."
 }
 
 # Detect the operating system
@@ -61,3 +74,6 @@ else
 fi
 
 check_ssl_certificates
+
+echo "Installation completed successfully."
+echo "Use sudo bash server.sh --start' to start the server."

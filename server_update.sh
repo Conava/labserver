@@ -19,6 +19,7 @@ update_with_username_password() {
 }
 
 # Try to update the server.sh using SSL
+echo "Updating the server..."
 if update_with_ssl; then
     echo "Server updated successfully using SSL."
 else
@@ -26,3 +27,4 @@ else
     # If it fails, fall back to using username and password
     update_with_username_password
 fi
+echo "Update completed successfully."

@@ -16,60 +16,98 @@
         </div>
     </form>
     <div id="overlay" class="hidden"></div>
-<div id="popup" class="hidden">
-    <div id="popupHeader">
-        <div>Error</div>
-        <span id="closePopup"><i class="fas fa-times"></i></span>
+    <div id="errorPopup" class="hidden popup">
+        <div class="popupHeader">
+            <div>Error</div>
+            <span id="closeErrorPopup"><i class="closeButton fas fa-times"></i></span>
+        </div>
+        <p>Incorrect credentials. Please try again.</p>
     </div>
-    <p>Incorrect credentials. Please try again.</p>
-</div>
+    <div id="authPopup" class="hidden popup">
+        <div id="authPopupHeader" class="popupHeader">
+            <div>Authenticating</div>
+        </div>
+        <p>Waiting for authentication...</p>
+    </div>
     <script>
-        document.getElementById('closePopup').addEventListener('click', hidePopup);
+        document.getElementById('closeErrorPopup').addEventListener('click', hidePopup);
         document.getElementById('overlay').addEventListener('click', hidePopup);
 
         function hidePopup() {
-            document.getElementById('popup').classList.add('hidden');
+            document.getElementById('errorPopup').classList.add('hidden');
             document.getElementById('overlay').classList.add('hidden');
         }
 
-        document.getElementById('authForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams(new FormData(event.target))
-    }).then(function(response) {
-        if (response.status === 401) {
-            // If the server.sh responded with status 401, show the popup
-            document.getElementById('popup').classList.remove('hidden');
+        function showErrorPopup(message) {
+            // Set the error message
+            document.querySelector('#errorPopup p').textContent = message;
+            // Show the error popup and the overlay
+            document.getElementById('errorPopup').classList.remove('hidden');
             document.getElementById('overlay').classList.remove('hidden');
 
             document.querySelector('input[name="username"]').value = '';
             document.querySelector('input[name="password"]').value = '';
             checkInput();
-        } else {
-            // If the server.sh responded with a different status, redirect to the response URL
-            window.location.href = response.url;
         }
-    });
-});
+
+        function checkInput() {
+            if (usernameField.value.length > 0 && passwordField.value.length > 0) {
+                loginButton.style.backgroundColor = '#008000'; // green
+                loginButton.disabled = false; // enable the button
+            } else {
+                loginButton.style.backgroundColor = '#FF0000'; // red
+                loginButton.disabled = true; // disable the button
+            }
+        }
+
+        // Check if there's an error message
+        <% if (typeof error !== 'undefined') { %>
+        // If there's an error message, show the error popup with the message
+        showErrorPopup('<%= error %>');
+        <% } %>
+
+        document.getElementById('authForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(new FormData(event.target))
+            }).then(function(response) {
+                if (response.status === 401) {
+                    // If the server responded with status 401, show the popup
+                    showErrorPopup('Incorrect credentials. Please try again.');
+                } else if (response.status === 200) {
+                    // If the server responded with status 200, make a fetch request to the /auth route
+                    fetch('/auth', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+
+                    }).then(function(authResponse) {
+                        console.log("Test:    " + authResponse);
+                        if (!authResponse.ok) {
+                            // If the /auth route responded with status 401, show the popup
+                            showErrorPopup('Authentication failed. Please try again.');
+                        } else {
+                            // If the /auth route responded with a different status, redirect to the response URL
+                            window.location.href = authResponse.url;
+                        }
+                    });
+                } else {
+                    // If the server responded with a different status, redirect to the response URL
+                    window.location.href = response.url;
+                }
+            });
+        });
         var usernameField = document.querySelector('input[name="username"]');
         var passwordField = document.querySelector('input[name="password"]');
         var loginButton = document.getElementById('loginBtn');
         loginButton.disabled = true;
 
-        function checkInput() {
-    if (usernameField.value.length > 0 && passwordField.value.length > 0) {
-        loginButton.style.backgroundColor = '#008000'; // green
-        loginButton.disabled = false; // enable the button
-    } else {
-        loginButton.style.backgroundColor = '#FF0000'; // red
-        loginButton.disabled = true; // disable the button
-    }
-}
         usernameField.addEventListener('input', checkInput);
         passwordField.addEventListener('input', checkInput);
         document.getElementById('loginBtn').addEventListener('click', function() {

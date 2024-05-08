@@ -5,10 +5,10 @@ display_help() {
     echo "Usage: ./server.sh [command] [argument]"
     echo ""
     echo "Commands:"
-    echo "  start [port]    Start the server on the specified port (default: 443, 80 if no SSL certificate is found"
-    echo "  stop            Stop the server"
-    echo "  restart [port]  Restart the server on the specified port (default: 443, 80 if no SSL certificate is found)"
-    echo "  help            Display this help message"
+    echo "  --start [port]    Start the server. The port can optionally be specified. Uses http Server if Certificates are installed. Must be executed as root if Ports 80 and 443 are used.(default: 443, 80 if no SSL certificate is found"
+    echo "  --stop            Stop the server"
+    echo "  --restart [port]  Restart the server. The port can optionally be specified. Uses http Server if Certificates are installed. Must be executed as root if Ports 80 and 443 are used. (default: 443, 80 if no SSL certificate is found)"
+    echo "  --help            Display this help message"
 }
 
 # Function to start the server
@@ -49,14 +49,14 @@ restart_server() {
 }
 
 # Check the command-line argument
-if [ "$1" = "start" ]; then
+if [ "$1" = "--start" ]; then
     start_server $2
-elif [ "$1" = "stop" ]; then
+elif [ "$1" = "--stop" ]; then
     stop_server
-elif [ "$1" = "restart" ]; then
+elif [ "$1" = "--restart" ]; then
     restart_server $2
-elif [ "$1" = "help" ]; then
+elif [ "$1" = "--help" ]; then
     display_help
 else
-    echo "Invalid argument. Please use 'start', 'stop', or 'restart'."
+    echo "Invalid argument. Please use '--start', '--stop', or '--restart'."
 fi
