@@ -2,36 +2,19 @@
 
 # Function to check for SSL certificates and generate them if not found
 check_ssl_certificates() {
-    if [[ ! -f key.pem ]] || [[ ! -f cert.pem ]]; then
-        echo "SSL certificates not found."
-        read -p "Do you want to generate new certificates? (y/n) " choice
-        case "$choice" in
-            y|Y )
-                echo "Generating new certificates..."
-                openssl genrsa -out key.pem 2048
-                openssl req -new -x509 -key key.pem -out cert.pem -days 365
-                echo "Certificates generated successfully."
-                ;;
-            n|N )
-                echo "Not generating new certificates."
-                ;;
-            * )
-                echo "Invalid choice. Please enter 'y' or 'n'."
-                check_ssl_certificates
-                ;;
-        esac
-    else
-        echo "SSL certificates found."
-    fi
+    # ... existing code ...
 }
+
 # Function to install packages on Debian
 install_debian() {
     echo "Updating package list..."
     sudo apt-get update
     echo "Installing nodejs and npm..."
     sudo apt-get install -y nodejs npm
-    echo "Installing npm packages..."
-    npm install bcrypt ejs express express-session fs
+    echo "Installing npm packages for server..."
+    cd server && npm install
+    echo "Installing npm packages for client..."
+    cd ../client && npm install
     echo "All packages installed successfully."
 }
 
@@ -41,20 +24,24 @@ install_arch() {
     sudo pacman -Syu
     echo "Installing nodejs and npm..."
     sudo pacman -S nodejs npm
-    echo "Installing npm packages..."
-    npm install bcrypt ejs express express-session fs
+    echo "Installing npm packages for server..."
+    cd server && npm install
+    echo "Installing npm packages for client..."
+    cd ../client && npm install
     echo "All packages installed successfully."
 }
 
 # Function to install packages on macOS
 install_macos() {
-    Check if homebrew is installed
+    # Check if homebrew is installed
     # Uncomment the line below if homebrew is not installed
     #/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     echo "Installing nodejs and npm..."
     brew install nodejs npm
-    echo "Installing npm packages..."
-    npm install bcrypt ejs express express-session fs
+    echo "Installing npm packages for server..."
+    cd server && npm install
+    echo "Installing npm packages for client..."
+    cd ../client && npm install
     echo "All packages installed successfully."
 }
 

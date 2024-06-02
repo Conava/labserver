@@ -1,16 +1,11 @@
 # coral-webserver
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
+### Compiles and hot-reloads for UI development
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compiles and minifies for production and use with node.js server
 ```
 npm run build
 ```

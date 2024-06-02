@@ -13,21 +13,37 @@ display_help() {
 
 # Function to start the server
 start_server() {
-    # Check if the script is run with sudo privileges
-    if [ "$EUID" -ne 0 ]; then
-        echo "Please run the start command as root or with sudo privileges."
-        exit 1
+    local port=${1:-443}  # Use the first argument as the port number, or 443 (80 without SSL certificate) if no argument is provided
+
+    # Check if the script is run with sudo privileges only if port is 80 or 443
+    if [[ "$port" == "80" || "$port" == "443" ]]; then
+        if [ "$EUID" -ne 0 ]; then
+            echo "Please enter your root password to start the server on port $port:"
+            sudo -S true < /dev/tty
+            if [ $? -ne 0 ]; then
+                echo "Incorrect password. Exiting."
+                exit 1
+            fi
+        fi
     fi
 
     # Check if the server is already running
-    if pgrep -f "node server.js" > /dev/null; then
+    if pgrep -f "node server/server.js" > /dev/null; then
         echo "The server is already running."
         exit 1
     fi
 
-    local port=${1:-443}  # Use the first argument as the port number, or 443 (80 without SSL certificate) if no argument is provided
+    # Run npm build in the client directory before starting the server
+    echo "Running npm build in the client directory..."
+    cd client && npm run build
+    if [ $? -ne 0 ]; then
+        echo "Failed to run npm build in the client directory. Exiting."
+        exit 1
+    fi
+    cd ..
+
     echo "Starting the server on port $port..."
-    nohup node server.js "$port" > output.log 2>&1 &
+    nohup sudo -S node server.js "$port" > output.log 2>&1 &
     echo "Server started successfully on port $port."
     echo "Output is redirected to output.log."
 }
