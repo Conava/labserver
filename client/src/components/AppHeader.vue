@@ -40,8 +40,9 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--background-color);
+  background-color: var(--header-background-color);
   color: var(--text-color);
+  border-bottom: 1px solid grey;
 }
 
 header h1 {
