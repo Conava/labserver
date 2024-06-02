@@ -5,20 +5,13 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const SQLiteStore = require('connect-sqlite3')(session);
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
-
-app.use(session({
-    secret: 'your secret key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: true, // Ensures the browser only sends the cookie over HTTPS.
-        httpOnly: true, // Ensures the cookie is sent only over HTTP(S), not client JavaScript, helping to protect against cross-site scripting attacks.
-        sameSite: true, // Ensures the cookie is only sent for same-site requests, helping to protect against cross-site request forgery attacks.
-        maxAge: 60000 // Sets the maximum age of the cookie (e.g., 1 minute in this case).
-    }
-}));
 
 // Serve static files from the Vue app
 app.use('/', serveStatic(path.join(__dirname, '../client/dist'), {
@@ -30,16 +23,85 @@ app.use('/', serveStatic(path.join(__dirname, '../client/dist'), {
 
 app.use(bodyParser.json());
 
-app.post('/login', (req, res) => {
-    const {username, password} = req.body;
+app.use(cookieParser());
 
-    // Authenticate the user
-    // This is just a simple example, in a real application you should use a more secure way to authenticate users
-    if (username === 'admin' && password === 'password') {
-        res.json({success: true});
-    } else {
-        res.json({success: false});
+passport.serializeUser(function(user, done) {
+    return done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+    db.get('SELECT id, username FROM users WHERE id = ?', id, function(err, row) {
+        if (!row) return done(null, false);
+        return done(null, row);
+    });
+});
+
+passport.use(new LocalStrategy(
+    function(username, password, done) {
+        db.get('SELECT password FROM users WHERE username = ?', username, function(err, row) {
+            if (!row) return done(null, false);
+            bcrypt.compare(password, row.password, function(err, res) {
+                if (!res) return done(null, false);
+                db.get('SELECT id, username FROM users WHERE username = ?', username, function(err, row) {
+                    return done(null, row);
+                });
+            });
+        });
     }
+));
+
+app.use(session({
+    store: new SQLiteStore,
+    secret: 'your secret key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: false, //todo: set to true in production
+        httpOnly: true,
+        sameSite: true,
+        maxAge: 60000
+    }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.post('/login', passport.authenticate('local'), function(req, res) {
+    // Create JWT
+    const token = jwt.sign({ id: req.user.id }, 'your_jwt_secret', { expiresIn: '1h' });
+
+    // Store JWT in a cookie
+    res.cookie('jwt', token, { httpOnly: true, sameSite: true });
+
+    res.json({success: true});
+});
+
+// Middleware to protect routes
+function authenticateJWT(req, res, next) {
+    const token = req.cookies.jwt;
+
+    if (token) {
+        jwt.verify(token, 'your_jwt_secret', (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+
+            req.user = user;
+            next();
+        });
+    } else {
+        res.sendStatus(401);
+    }
+}
+
+app.get('/protected', authenticateJWT, (req, res) => {
+    // If this point is reached, the user is authenticated
+    res.json({message: 'This is a protected route'});
+});
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.json({success: true});
 });
 
 app.get('/', (req, res) => {
@@ -98,13 +160,15 @@ function addUser(username, password) {
     });
 }
 
-// DELETE ON PRODUCTION
+// todo: remove this in production
+/*
 addUser('admin', 'nimda');
 addUser('Marlon', 'nimda');
 addUser('Silas', 'nimda');
 addUser('Oskar', 'nimda');
 addUser('Laurin', 'nimda');
 addUser('Ludwig', 'nimda');
+*/
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
