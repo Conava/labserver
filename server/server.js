@@ -9,7 +9,6 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const SQLiteStore = require('connect-sqlite3')(session);
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
 
@@ -66,37 +65,43 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.post('/login', passport.authenticate('local'), function(req, res) {
-    // Create JWT
-    const token = jwt.sign({ id: req.user.id }, 'your_jwt_secret', { expiresIn: '1h' });
+app.post('/login', function(req, res) {
+  const { username, password } = req.body;
 
-    // Store JWT in a cookie
-    res.cookie('jwt', token, { httpOnly: true, sameSite: true });
+  db.get('SELECT password FROM users WHERE username = ?', username, function(err, row) {
+    if (!row) {
+      return res.status(401).json({ success: false, message: 'Invalid username or password' });
+    }
 
-    res.json({success: true});
+    bcrypt.compare(password, row.password, function(err, result) {
+      if (result) {
+        req.session.isLoggedIn = true;
+        return res.json({ success: true });
+      } else {
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+      }
+    });
+  });
 });
 
-// Middleware to protect routes
-function authenticateJWT(req, res, next) {
-    const token = req.cookies.jwt;
+app.post('/authenticate', function(req, res) {
+  // Implement your authentication logic here
+  // If the authentication is successful, set a session cookie
+  req.session.isAuthenticated = true;
+  res.json({ success: true });
+});
 
-    if (token) {
-        jwt.verify(token, 'your_jwt_secret', (err, user) => {
-            if (err) {
-                return res.sendStatus(403);
-            }
-
-            req.user = user;
-            next();
-        });
-    } else {
-        res.sendStatus(401);
-    }
+function ensureAuthenticated(req, res, next) {
+  if (req.session.isAuthenticated) {
+    next();
+  } else {
+    res.status(401).json({ success: false, message: 'You are not authenticated' });
+  }
 }
 
-app.get('/protected', authenticateJWT, (req, res) => {
-    // If this point is reached, the user is authenticated
-    res.json({message: 'This is a protected route'});
+app.get('/protected', ensureAuthenticated, function(req, res) {
+  // This route is only accessible to authenticated users
+  res.json({ success: true, message: 'You are viewing a protected route' });
 });
 
 app.get('/logout', function(req, res){

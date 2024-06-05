@@ -2,8 +2,28 @@
 
 # Function to check for SSL certificates and generate them if not found
 check_ssl_certificates() {
-    # ... existing code ...
+    if [[ ! -f key.pem ]] || [[ ! -f cert.pem ]]; then
+        echo "SSL certificates not found."
+        read -p "Do you want to generate new certificates? (y/n) " choice
+        case "$choice" in
+            y|Y )
+                echo "Generating new certificates..."
+                openssl genrsa -out key.pem 2048
+                openssl req -new -x509 -key key.pem -out cert.pem -days 365
+                ;;
+            n|N )
+                echo "Not generating new certificates."
+                ;;
+            * )
+                echo "Invalid choice. Please enter 'y' or 'n'."
+                check_ssl_certificates
+                ;;
+        esac
+    else
+        echo "SSL certificates found."
+    fi
 }
+
 
 # Function to install packages on Debian
 install_debian() {

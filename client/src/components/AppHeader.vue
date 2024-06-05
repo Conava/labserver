@@ -29,7 +29,8 @@ export default {
       }
     },
     logout() {
-      // Implement your logout logic here
+      localStorage.clear();
+      this.$emit('logout');
     }
   }
 };
