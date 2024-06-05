@@ -1,0 +1,1 @@
+(echo "laboratory"; sleep 1) | telnet localhost 3000
