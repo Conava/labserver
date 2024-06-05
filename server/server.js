@@ -104,9 +104,18 @@ app.get('/protected', ensureAuthenticated, function(req, res) {
   res.json({ success: true, message: 'You are viewing a protected route' });
 });
 
-app.get('/logout', function(req, res){
-  req.logout();
-  res.json({success: true});
+app.post('/logout', function(req, res){
+  req.logout(function(err) {
+    if (err) {
+      // Handle error
+      console.error(err);
+      return res.json({success: false});
+    }
+    // If logout was successful, set the session variables to false
+    req.session.isLoggedIn = false;
+    req.session.isAuthenticated = false;
+    res.json({success: true});
+  });
 });
 
 app.get('/', (req, res) => {
