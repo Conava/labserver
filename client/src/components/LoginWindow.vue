@@ -9,7 +9,7 @@
         <label for="password">Password</label>
         <input id="password" type="password" v-model="password" placeholder="Password">
 
-        <button type="submit">Sign In</button>
+        <button type="submit">Log in</button>
       </form>
     </div>
   </div>
@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     async submitForm() {
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

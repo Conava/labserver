@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Function to display help information
+display_help() {
+    echo "Usage: ./server.sh [command] [arguments]"
+    echo ""
+    echo "Commands:"
+    echo "  --start [dev | prod] [port]    Start the server. The port and environment can optionally be specified. The dev environment uses http with default port 3000 while prod environment uses https with default port 443."
+    echo "  --stop            Stop the server"
+    echo "  --restart [dev | prod] [port]  Restart the server. The port can optionally be specified. Uses http Server if Certificates are installed. Must be executed as root if Ports 80 and 443 are used. (default: 443, 80 if no SSL certificate is found)"
+    echo "  --help            Display this help message"
+}
+
+# Function to start the server
+start_server() {
+    # Initialize variables
+    local env="prod"
+    local port
+
+    # Parse command-line arguments for port and environment
+    while getopts ":e:E:p:P:" opt; do
+        case ${opt} in
+            e|E)
+                env=$OPTARG
+                env=${env// /}  # Remove spaces from the env variable
+                ;;
+            p|P)
+                port=$OPTARG
+                port=${port// /}  # Remove spaces from the port variable
+                ;;
+            \?)
+                echo "Invalid option: $OPTARG" 1>&2
+                ;;
+            :)
+                echo "Invalid option: $OPTARG requires an argument" 1>&2
+                ;;
+        esac
+    done
+    shift $((OPTIND -1))
+
+    # Check if the script is run with sudo privileges only if port is 80 or 443 or not specified
+    if [[ -z "$port" || "$port" == "80" || "$port" == "443" ]]; then
+        if [ "$EUID" -ne 0 ]; then
+            echo "Please enter your root password to start the server on port ${port:-443}:"
+            sudo -S true < /dev/tty
+            if [ $? -ne 0 ]; then
+                echo "Incorrect password. Exiting."
+                exit 1
+            fi
+        fi
+    fi
+
+    # Check if the server is already running
+    if pgrep -f "node server/server.js" > /dev/null; then
+        echo "The server is already running."
+        exit 1
+    fi
+
+    # Run npm build in the client directory before starting the server
+    echo "Running npm build in the client directory..."
+    cd ../client && npm run build
+    if [ $? -ne 0 ]; then
+        echo "Failed to run npm build in the client directory. Exiting."
+        exit 1
+    fi
+    cd ../server || exit
+
+    # Start the server with the provided arguments or defaults
+    echo "Starting the server with environment ${env:-prod} on port ${port:-443}..."
+    nohup sudo -S node server.js "-e=${env:-prod}" "-p=${port:-443}" > output.log 2>&1 &
+    echo "Server started successfully."
+    echo "Output is redirected to output.log."
+}
+
+# Function to stop the server
+stop_server() {
+    echo "Stopping the server..."
+
+    sudo pkill -f node
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to stop the server. Are you sure it's running?"
+        exit 1
+    fi
+    echo "Server stopped successfully."
+}
+
+# Function to restart the server
+restart_server() {
+    echo "Restarting the server..."
+    stop_server
+    start_server $1 $2
+    echo "Server restarted successfully."
+}
+
+# Check the command-line argument
+if [ "$1" = "--start" ]; then
+    start_server $2 $3
+elif [ "$1" = "--stop" ]; then
+    stop_server
+elif [ "$1" = "--restart" ]; then
+    restart_server $2 $3
+elif [ "$1" = "--help" ]; then
+    display_help
+else
+    echo "Invalid argument. Please use '--start', '--stop', or '--restart'."
+fi

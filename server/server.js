@@ -10,7 +10,15 @@ const LocalStrategy = require('passport-local').Strategy;
 const SQLiteStore = require('connect-sqlite3')(session);
 const cookieParser = require('cookie-parser');
 const app = express();
-const port = 3000;
+const https = require('https');
+const http = require('http');
+const fs = require('fs');
+const minimist = require('minimist');
+
+const sslOptions = {
+  key: fs.readFileSync('certificates/key.pem'),
+  cert: fs.readFileSync('certificates/cert.pem')
+};
 
 // Serve static files from the Vue app
 app.use('/', serveStatic(path.join(__dirname, '../client/dist'), {
@@ -184,6 +192,44 @@ addUser('Laurin', 'nimda');
 addUser('Ludwig', 'nimda');
 */
 
-app.listen(port, () => {
+/*
+Starts the server.
+Optional command-line arguments: -e, --env, -p, --port
+-e, --env: Specifies the environment (dev or prod)
+-p, --port: Specifies the port number
+
+Example usage: node server.js -e dev -p 3000
+This will start the server in development mode on port 3000.
+ */
+let server;
+let port;
+
+// Parse command-line arguments
+console.log(process.argv);
+console.log(process.argv.slice(2));
+
+const args = minimist(process.argv.slice(2), {
+    string: ['e', 'p'], // Specify that 'e' and 'p' are string flags
+    alias: {
+        e: 'env',
+        p: 'port'
+    },
+    default: {
+        env: 'prod',
+        port: 443
+    }
+});
+console.log(args.env);
+if (args.env === 'dev') {
+    server = http.createServer(app);
+    console.log('Server running in development mode on HTTP');
+    port = args.port; // Use the provided port number or default to 3000
+} else {
+    server = https.createServer(sslOptions, app);
+    console.log('Server running in production mode on HTTPS');
+    port = args.port; // Use the provided port number or default to 443
+}
+
+server.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
 });

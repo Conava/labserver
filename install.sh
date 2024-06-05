@@ -3,7 +3,7 @@
 # Function to check for SSL certificates and generate them if not found
 check_ssl_certificates() {
     if [[ ! -f key.pem ]] || [[ ! -f cert.pem ]]; then
-        cd server
+        cd server/certificates || exit
         echo "SSL certificates not found."
         read -p "Do you want to generate new certificates? (y/n) " choice
         case "$choice" in
@@ -20,7 +20,7 @@ check_ssl_certificates() {
                 check_ssl_certificates
                 ;;
         esac
-        cd ..
+        cd ../..
     else
         echo "SSL certificates found."
     fi
@@ -87,5 +87,7 @@ fi
 
 check_ssl_certificates
 
+chmod +x server/server
+
 echo "Installation completed successfully."
-echo "Use sudo bash server.sh --start' to start the server."
+echo "Use ./server --start' to start the server."

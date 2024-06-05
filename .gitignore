@@ -1,14 +1,12 @@
-users.json
 /.idea/
-/node_modules/
-/output.log
-/key.pem
-/cert.pem
+/server/node_modules/
+/server/output.log
+/server/certificates/
+/server/sessions
+/server/users.db
 .DS_Store
-node_modules
-/dist
-/old/
 /client/dist/
+/client/node_modules/
 
 # local env files
 .env.local
@@ -28,6 +26,3 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
-
-/server/sessions
