@@ -24,9 +24,6 @@ const sslOptions = {
 // Serve static files from the Vue app
 app.use('/', serveStatic(path.join(__dirname, '../client/dist'), {
     index: ['index.html', 'subdirectory/index.html'],
-    setHeaders: function (res, path) {
-        res.setHeader('Access-Control-Allow-Origin', '*')
-    }
 }));
 
 app.use(bodyParser.json());
