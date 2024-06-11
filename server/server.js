@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const https = require('https');
 const http = require('http');
+const net = require('net');
 const fs = require('fs');
 const minimist = require('minimist');
 
@@ -93,10 +94,46 @@ app.post('/login', function(req, res) {
 });
 
 app.post('/authenticate', function(req, res) {
-  // Implement your authentication logic here
-  // If the authentication is successful, set a session cookie
-  req.session.isAuthenticated = true;
-  res.json({ success: true });
+    console.log("Authenticating...");
+    // todo: replace with actual port and IP in production
+    let coralPort = 44000;
+    let coralIP = 'localhost';
+    let expectedAnswer = '1';
+
+    const coral = net.createConnection({ port: coralPort, host: coralIP }, () => {
+        // Send string to other device
+        coral.write('Your string');
+    });
+
+
+    coral.on('data', (data) => {
+        // Receive answer and evaluate it
+        const answer = data.toString();
+        if (answer === expectedAnswer) {
+            console.log('Access granted');
+            req.session.isAuthenticated = true;
+            res.json({ success: true });
+        } else {
+            res.status(401).json({ success: false, message: 'Access denied' });
+            console.log('Access denied');
+        }
+        coral.end();
+    });
+
+    coral.on('error', (err) => {
+        console.log('An error occurred on the server');
+        console.error(err);
+        res.status(500).json({ success: false, message: 'An error occurred on the server' });
+    });
+
+    // Set a timeout of one minute to receive the answer
+    setTimeout(() => {
+        if (!req.session.isAuthenticated) {
+            console.log('Authentication timed out');
+            coral.end();
+            res.status(408).json({ success: false, message: 'Authentication timed out' });
+        }
+    }, 60000);
 });
 
 function ensureAuthenticated(req, res, next) {
@@ -183,14 +220,14 @@ function addUser(username, password) {
 }
 
 // todo: remove this in production
-/*
+
 addUser('admin', 'nimda');
 addUser('Marlon', 'nimda');
 addUser('Silas', 'nimda');
 addUser('Oskar', 'nimda');
 addUser('Laurin', 'nimda');
 addUser('Ludwig', 'nimda');
-*/
+
 
 /*
 Starts the server.

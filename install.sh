@@ -2,8 +2,17 @@
 
 # Function to check for SSL certificates and generate them if not found
 check_ssl_certificates() {
+    # Check if the certificates directory exists and create it if not
+    if [[ ! -d server/certificates ]]; then
+        echo "Certificates directory not found. Creating it..."
+        mkdir -p server/certificates
+    fi
+
+    # Change directory to server/certificates
+    cd server/certificates || exit
+
+    # Check if SSL certificates exist and generate them if not
     if [[ ! -f key.pem ]] || [[ ! -f cert.pem ]]; then
-        cd server/certificates || exit
         echo "SSL certificates not found."
         read -p "Do you want to generate new certificates? (y/n) " choice
         case "$choice" in
@@ -20,10 +29,12 @@ check_ssl_certificates() {
                 check_ssl_certificates
                 ;;
         esac
-        cd ../..
     else
         echo "SSL certificates found."
     fi
+
+    # Change directory back to the root of the project
+    cd ../..
 }
 
 
@@ -90,4 +101,4 @@ check_ssl_certificates
 chmod +x server/server
 
 echo "Installation completed successfully."
-echo "Use ./server --start' to start the server."
+echo "Use ./server --start' in server directory to start the server."
