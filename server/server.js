@@ -15,6 +15,7 @@ const http = require('http');
 const net = require('net');
 const fs = require('fs');
 const minimist = require('minimist');
+let env;
 
 const sslOptions = {
   key: fs.readFileSync('certificates/key.pem'),
@@ -94,12 +95,19 @@ app.post('/authenticate', function(req, res) {
     console.log("Authenticating...");
     // todo: replace with actual port and IP in production
     let coralPort = 44000;
-    let coralIP = 'localhost';
+    if(env === 'dev') {
+        let coralIP = 'localhost';
+    } else {
+        let coralIP = '';
+    }
     let expectedAnswer = '1';
+    // Create a random connection id
+    const connectionId = Math.floor(Math.random() * 1000);
 
     const coral = net.createConnection({ port: coralPort, host: coralIP }, () => {
-        // Send string to other device
-        coral.write('Your string');
+        // Send connectionId to other device
+        //todo: uncomment and sync with coral
+        //coral.write(connectionId.toString());
     });
 
 
@@ -216,7 +224,7 @@ function addUser(username, password) {
     });
 }
 
-// todo: remove this in production
+// todo: remove this in production. Uncomment if users.db not present
 
 addUser('admin', 'nimda');
 addUser('Marlon', 'nimda');
@@ -250,7 +258,7 @@ const args = minimist(process.argv.slice(2), {
     },
     default: {
         env: 'prod',
-        port: 443
+        port: (process.argv.includes('-e') && process.argv[process.argv.indexOf('-e') + 1] === 'dev') ? 3000 : 443
     }
 });
 console.log(args.env);
@@ -258,12 +266,14 @@ if (args.env === 'dev') {
     server = http.createServer(app);
     console.log('Server running in development mode on HTTP');
     port = args.port; // Use the provided port number or default to 3000
+    env = 'dev';
 } else {
     server = https.createServer(sslOptions, app);
     console.log('Server running in production mode on HTTPS');
     port = args.port; // Use the provided port number or default to 443
+    env = 'prod';
 }
 
-server.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+server.listen(port, '0.0.0.0', () => {
+    console.log(`Server listening at http://0.0.0.0:${port}`);
 });
