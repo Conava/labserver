@@ -100,7 +100,8 @@ app.post('/authenticate', function(req, res) {
     } else {
         let coralIP = '192.168.4.10';
     }
-    let expectedAnswer = '1';
+    let rejectedAnswer = 'ime\"';
+    let expectedAnswer3 = '\":3';
     // Create a random connection id
     const connectionId = Math.floor(Math.random() * 1000);
 
@@ -114,11 +115,11 @@ app.post('/authenticate', function(req, res) {
     coral.on('data', (data) => {
         // Receive answer and evaluate it
         const answer = data.toString();
-        if (answer === expectedAnswer) {
+        if (answer === expectedAnswer3) {
             console.log('Access granted');
             req.session.isAuthenticated = true;
             res.json({ success: true });
-        } else {
+        } else if (answer === rejectedAnswer){
             res.status(401).json({ success: false, message: 'Access denied' });
             console.log('Access denied');
         }
