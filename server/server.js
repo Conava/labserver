@@ -98,7 +98,7 @@ app.post('/authenticate', function(req, res) {
     if(env === 'dev') {
         let coralIP = 'localhost';
     } else {
-        let coralIP = '';
+        let coralIP = '192.168.4.10';
     }
     let expectedAnswer = '1';
     // Create a random connection id
