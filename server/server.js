@@ -109,6 +109,7 @@ app.post('/authenticate', function(req, res) {
         // Send connectionId to other device
         //todo: uncomment and sync with coral
         //coral.write(connectionId.toString());
+        coral.write(Buffer.from([0x01]));
     });
 
 
