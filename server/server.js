@@ -95,10 +95,11 @@ app.post('/authenticate', function(req, res) {
     console.log("Authenticating...");
     // todo: replace with actual port and IP in production
     let coralPort = 44000;
+    let coralIP;
     if(env === 'dev') {
-        let coralIP = 'localhost';
+        coralIP = 'localhost';
     } else {
-        let coralIP = '192.168.4.10';
+        coralIP = '192.168.4.10';
     }
     let expectedAnswer = '1';
     // Create a random connection id
