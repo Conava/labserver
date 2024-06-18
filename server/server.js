@@ -15,7 +15,6 @@ const http = require('http');
 const net = require('net');
 const fs = require('fs');
 const minimist = require('minimist');
-let env;
 
 const sslOptions = {
   key: fs.readFileSync('certificates/key.pem'),
@@ -244,13 +243,7 @@ Optional command-line arguments: -e, --env, -p, --port
 Example usage: node server.js -e dev -p 3000
 This will start the server in development mode on port 3000.
  */
-let server;
-let port;
-
 // Parse command-line arguments
-console.log(process.argv);
-console.log(process.argv.slice(2));
-
 const args = minimist(process.argv.slice(2), {
     string: ['e', 'p'], // Specify that 'e' and 'p' are string flags
     alias: {
@@ -259,20 +252,32 @@ const args = minimist(process.argv.slice(2), {
     },
     default: {
         env: 'prod',
-        port: (process.argv.includes('-e') && process.argv[process.argv.indexOf('-e') + 1] === 'dev') ? 3000 : 443
+        port: 443
     }
 });
-console.log(args.env);
-if (args.env === 'dev') {
+
+let env = args.env;
+let port = args.port;
+
+// If only a port is specified, use that and set env to prod
+if (args._.length === 1 && !isNaN(args._[0])) {
+    port = args._[0];
+    env = 'prod';
+}
+
+// If the environment is 'dev', set the default port to 3000 if not specified
+if (env === 'dev' && !args.p) {
+    port = 3000;
+}
+
+let server;
+
+if (env === 'dev') {
     server = http.createServer(app);
     console.log('Server running in development mode on HTTP');
-    port = args.port; // Use the provided port number or default to 3000
-    env = 'dev';
 } else {
     server = https.createServer(sslOptions, app);
     console.log('Server running in production mode on HTTPS');
-    port = args.port; // Use the provided port number or default to 443
-    env = 'prod';
 }
 
 server.listen(port, '0.0.0.0', () => {
