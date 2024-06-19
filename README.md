@@ -40,7 +40,7 @@ openssl req -x509 -newkey rsa:4096 -keyout server/certificates/key.pem -out serv
 
 #### Make the server script executable
 ```
-chmod +x server/start.sh
+chmod +x server/server
 ```
 
 ## Running the UI dev Environment
@@ -65,21 +65,22 @@ cd server
 
 ### Start the server
 ```
-./server --start
+./server start
 ```
-Optionally, you can also specify the environment with the `-E` flag, e.g. `./server.sh --start -Edev`
-Available environments are `dev`and `prod`: `dev` will use the http server on port 80 (default) and `prod` will start a https server on port 443 (default).
+Optionally, you can also specify the environment with the `--env | -e` flag, e.g. `./server start --env dev`
+Available environments are `dev`and `prod`: `dev` will use the http server on port 3000 (default) and `prod` will start a https server on port 443 (default).
 
-You can also specify the port with the `-P` flag, e.g. `./server.sh --start -P8080`
+You can also specify the port with the `-port | -p` flag, e.g. `./server start -e prod -p 443`
 
 The output is redirected to the output.log file in the server directory.
 
 ### Stop the server
 ```
-./server --stop
+./server stop
 ```
 
 ### Restart the server
 ```
-./server --restart
+./server restart
 ```
+The same flags as for the start command can be used.

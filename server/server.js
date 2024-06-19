@@ -94,20 +94,22 @@ app.post('/authenticate', function(req, res) {
     console.log("Authenticating...");
     // todo: replace with actual port and IP in production
     let coralPort = 44000;
+    let coralIP;
     if(env === 'dev') {
-        let coralIP = 'localhost';
+        coralIP = 'localhost';
     } else {
-        let coralIP = '192.168.4.10';
+        coralIP = '192.168.4.10';
     }
     let rejectedAnswer = 'ime\"';
     let expectedAnswer3 = '\":3';
     // Create a random connection id
-    const connectionId = Math.floor(Math.random() * 1000);
+    const connectionId = Math.floor(Math.random() * 900) + 100; //3 digit number
 
     const coral = net.createConnection({ port: coralPort, host: coralIP }, () => {
         // Send connectionId to other device
         //todo: uncomment and sync with coral
-        //coral.write(connectionId.toString());
+        coral.write(connectionId.toString());
+        console.log("ConnectionId sent to coral: " + connectionId.toString());
     });
 
 
@@ -129,6 +131,13 @@ app.post('/authenticate', function(req, res) {
         console.log('An error occurred on the server');
         console.error(err);
         res.status(500).json({ success: false, message: 'An error occurred on the server' });
+    });
+
+    coral.on('close', () => {
+        console.log('The socket connection was closed unexpectedly');
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: 'The socket connection was closed unexpectedly' });
+        }
     });
 
     // Set a timeout of one minute to receive the answer
@@ -244,15 +253,11 @@ Example usage: node server.js -e dev -p 3000
 This will start the server in development mode on port 3000.
  */
 // Parse command-line arguments
+// Parse command-line arguments
 const args = minimist(process.argv.slice(2), {
-    string: ['e', 'p'], // Specify that 'e' and 'p' are string flags
     alias: {
         e: 'env',
         p: 'port'
-    },
-    default: {
-        env: 'prod',
-        port: 443
     }
 });
 
