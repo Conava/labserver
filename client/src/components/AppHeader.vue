@@ -53,7 +53,7 @@ header h1 {
 
 .placeholder {
   /* Adjust the width and height to match the logout button */
-  width: 80px;
+  width: 70px;
   height: 20px;
 }
 </style>

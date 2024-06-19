@@ -5,7 +5,7 @@
       <div class="main-content">
         <Login v-if="!isLoggedIn" @login="handleLogin"/>
         <CorelAuthWindow v-else-if="isLoggedIn && !isAuthenticated" @authenticate="handleAuthentication"/>
-        <HelloWorld v-else-if="isLoggedIn && isAuthenticated" msg="Laboratory Vault entered"/>
+        <HomeDashboard v-else-if="isLoggedIn && isAuthenticated" msg="Laboratory Vault entered"/>
       </div>
     </div>
   </div>
@@ -14,7 +14,7 @@
 <script>
 import {ref, computed} from 'vue';
 import axios from 'axios';
-import HelloWorld from './components/HelloWorld.vue'
+import HomeDashboard from './components/HomeDashboard.vue'
 import Login from './components/LoginWindow.vue'
 import CorelAuthWindow from './components/CorelAuthWindow.vue'
 import Header from "@/components/AppHeader.vue";
@@ -22,7 +22,7 @@ import Header from "@/components/AppHeader.vue";
 export default {
   name: 'App',
   components: {
-    HelloWorld,
+    HomeDashboard,
     Login,
     'app-header': Header,
     CorelAuthWindow
@@ -47,21 +47,25 @@ export default {
   },
   methods: {
     handleLogin(success) {
+      console.log('Login successful:', success)
       this.isLoggedIn = success;
     },
-    async handleAuthentication() {
+    async handleAuthentication(resolve) {
+      console.log('Authenticating...');
       try {
         const response = await axios.post('/authenticate');
         if (response.data.success) {
           this.isAuthenticated = true;
-        } else {      console.log(JSON.stringify({
-        id: 'test',
-        status: 'approved'
-      }))
+          console.log('Authentication successful');
+        } else {
+          console.log('Authentication failed');
           // Handle authentication failure
         }
       } catch (error) {
+        console.error('Error authenticating:', error);
         // Handle error
+      } finally {
+        resolve();
       }
     },
     async handleLogout() {

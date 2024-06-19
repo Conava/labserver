@@ -71,8 +71,8 @@ export default {
 
 .card input {
   display: block;
-  width: 100%;
-  margin-bottom: 10px;
+  width: 90%;
+  margin: 0 auto 10px;
 }
 
 .card button {
