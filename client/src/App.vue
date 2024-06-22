@@ -27,6 +27,15 @@ export default {
     'app-header': Header,
     CorelAuthWindow
   },
+  created() {
+    axios.get('/checkAuthentication')
+        .then(response => {
+          this.isLoggedIn = this.isAuthenticated = response.data.isAuthenticated;
+        })
+        .catch(error => {
+          console.error('Error checking authentication:', error);
+        });
+  },
   setup() {
     const darkMode = ref(localStorage.getItem('theme') === 'dark');
     const bodyClass = computed(() => darkMode.value ? 'dark-mode' : '');
