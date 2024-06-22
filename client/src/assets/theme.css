@@ -12,6 +12,7 @@
   --input-text-color: #333333; /* Dark Grey */
   --input-border-color: #ddd;
   --accent-color: #007BFF; /* Light Blue */
+  --accent-color2: #0851a9;
   --input-background-color: #dddddd; /* Light Grey */
 }
 
@@ -29,7 +30,8 @@ body.dark-mode {
   --button-hover-text-color: #f0f0f0; /* Light Grey */
   --input-text-color: #f0f0f0; /* Light Grey */
   --input-border-color: #555;
-  --accent-color: #375a7f; /* Dark Blue */
+  --accent-color: #007BFF; /* Dark Blue */
+  --accent-color2: #0851a9;
   --input-background-color: #333333; /* Dark Grey */
 }
 
