@@ -15,6 +15,7 @@
 
         <button type="submit" :disabled="isButtonDisabled">Log in</button>
       </form>
+      <p>{{ errorMessage }}</p>
     </div>
   </div>
 </template>
@@ -25,7 +26,8 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      errorMessage: ''
     }
   },
   computed: {
@@ -45,19 +47,18 @@ export default {
           password: this.password
         })
       });
-      const text = await response.text();
-      console.log('Response text:', text);
+      const data = await response.json();
+      console.log('Response text:', data);
 
-      try {
-        const data = JSON.parse(text);
-
-        if (data.success) {
-          this.$emit('login', true);
-        } else {
-          // Show an error message
-        }
-      } catch (error) {
-        console.error('Error parsing JSON:', error);
+      if (response.status === 401) {
+        // Display the error message
+        this.errorMessage = data.message;
+        this.username = '';
+        this.password = '';
+      } else if (data.success) {
+        this.$emit('login', true);
+      } else {
+        // Handle other cases
       }
     }
   }
@@ -77,6 +78,7 @@ button {
   position: relative;
   overflow: hidden;
   z-index: 1;
+  margin-bottom: 20px;
   &:after {
     content: '';
     position: absolute;
