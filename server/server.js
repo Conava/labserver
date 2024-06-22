@@ -15,6 +15,9 @@ const http = require('http');
 const net = require('net');
 const fs = require('fs');
 const minimist = require('minimist');
+const axios = require('axios');
+
+let db;
 
 // SSL options for HTTPS
 const sslOptions = {
@@ -143,60 +146,76 @@ function setupRoutes() {
     app.post('/authenticate', function (req, res) {
         console.log("Authenticating...");
         // todo: replace with actual port and IP in production
-        let coralPort = 44000;
         let coralIP;
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
         } else {
             coralIP = '192.168.4.10';
         }
-        let rejectedAnswer = '2';
-        let expectedAnswer3 = '1';
 
         // Create a random connectionId 3-digit number
         const connectionId = Math.floor(Math.random() * 900) + 100;
 
-        const coral = net.createConnection({port: coralPort, host: coralIP}, () => {
-            // Send connectionId to other device
-            //todo: uncomment and sync with coral
-            coral.write(connectionId.toString());
-            console.log("ConnectionId sent to coral: " + connectionId.toString());
-        });
+        // Send GET request to the coral's HTTP server
+        axios.get(`http://${coralIP}/${connectionId}`)
+            .then(response => {
+                // Check if the connectionId in the response matches the one we sent
+                if (response.data.connectionId !== connectionId) {
+                    console.log('ConnectionId mismatch');
+                    return res.status(401).json({ success: false, message: 'ConnectionId mismatch' });
+                }
 
-        coral.on('data', (data) => {
-            // Receive answer and evaluate it
-            const answer = data.toString();
-            if (answer === expectedAnswer3) {
-                console.log('Access granted');
-                req.session.isAuthenticated = true;
-                res.json({success: true});
-            } else if (answer === rejectedAnswer) {
-                res.status(401).json({success: false, message: 'Access denied'});
-                console.log('Access denied');
-            }
-            coral.end();
-        });
+                // Check the status in the response
+                if (response.data.status === 0) {
+                    console.log('Coral error');
+                    return res.status(500).json({ success: false, message: 'Coral error' });
+                } else if (response.data.status === 2) {
+                    console.log('Access denied');
+                    return res.status(401).json({ success: false, message: 'Access denied' });
+                }
 
-        coral.on('error', (err) => {
-            console.log('An error occurred on the server');
-            console.error(err);
-            res.status(500).json({success: false, message: 'An error occurred on the server'});
-        });
 
-        coral.on('close', () => {
-            console.log('The socket connection was closed unexpectedly');
-            if (!res.headersSent) {
-                res.status(500).json({success: false, message: 'The socket connection was closed unexpectedly'});
-            }
-        });
+                // Check the passphrase in the response
+                db.get('SELECT objectPassphrase FROM users WHERE id = ?', req.session.passport.user, function (err, row) {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({ success: false, message: 'Database error' });
+                    }
+
+                    if (!row) {
+                        console.log('User not found');
+                        return res.status(401).json({ success: false, message: 'User not found' });
+                    }
+
+                    bcrypt.compare(response.data.passphrase, row.objectPassphrase, function(err, result) {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({ success: false, message: 'Error comparing passphrases' });
+                        }
+
+                        if (!result) {
+                            console.log('Passphrase mismatch');
+                            return res.status(401).json({ success: false, message: 'Passphrase mismatch' });
+                        }
+
+                        // If everything checks out, the user is authenticated
+                        console.log('Access granted');
+                        req.session.isAuthenticated = true;
+                        res.json({ success: true });
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error connecting to coral:', error);
+                res.status(500).json({ success: false, message: 'Error connecting to coral' });
+            });
 
         // Set a timeout of one minute to receive the answer
         setTimeout(() => {
             if (!req.session.isAuthenticated) {
                 console.log('Authentication timed out');
-                coral.end();
                 if (!res.headersSent) {
-                    res.json({error: 'Authentication timed out'});
+                    res.json({ error: 'Authentication timed out' });
                 }
             }
         }, 60000);
@@ -224,7 +243,7 @@ function ensureAuthenticated(req, res, next) {
 // Function to initialize the database
 function initializeDatabase() {
     // Initialize the database
-    let db = new sqlite3.Database('./users.db', (err) => {
+    db = new sqlite3.Database('./users.db', (err) => {
         if (err) {
             console.error(err.message);
         }
@@ -247,7 +266,9 @@ function initializeDatabase() {
                 password
                     TEXT
                     NOT
-                        NULL
+                        NULL,
+                objectPassphrase
+                    TEXT
             )`, (err) => {
         if (err) {
             console.error(err.message);
@@ -256,29 +277,34 @@ function initializeDatabase() {
     });
 }
 
-function addUser(username, password) {
-    bcrypt.hash(password, 10, function (err, hash) {
+function addUser(username, password, objectPassphrase) {
+    bcrypt.hash(password, 10, function (err, passwordHash) {
         if (err) {
             return console.error(err);
         }
-        db.run(`INSERT INTO users(username, password)
-                VALUES (?, ?)`, [username, hash], function (err) {
+        bcrypt.hash(objectPassphrase, 10, function (err, passphraseHash) {
             if (err) {
-                return console.error(err.message);
+                return console.error(err);
             }
-            console.log(`User added with ID: ${this.lastID}`);
+            db.run(`INSERT INTO users(username, password, objectPassphrase)
+                    VALUES (?, ?, ?)`, [username, passwordHash, passphraseHash], function (err) {
+                if (err) {
+                    return console.error(err.message);
+                }
+                console.log(`User added with ID: ${this.lastID}`);
+            });
         });
     });
 }
 
 // todo: remove this in production. Uncomment if users.db not present
 
-// addUser('admin', 'nimda');
-// addUser('Marlon', 'nimda');
-// addUser('Silas', 'nimda');
-// addUser('Oskar', 'nimda');
-// addUser('Laurin', 'nimda');
-// addUser('Ludwig', 'nimda');
+addUser('admin', 'nimda', 'any');
+addUser('Marlon', 'nimda', 'lighter');
+addUser('Silas', 'nimda', 'hand');
+addUser('Oskar', 'nimda', 'pen');
+addUser('Laurin', 'nimda', 'watch');
+addUser('Ludwig', 'nimda', 'pointer');
 
 
 /*
