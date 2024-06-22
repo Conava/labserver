@@ -12,7 +12,6 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const cookieParser = require('cookie-parser');
 const https = require('https');
 const http = require('http');
-const net = require('net');
 const fs = require('fs');
 const minimist = require('minimist');
 const axios = require('axios');
