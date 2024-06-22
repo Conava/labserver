@@ -16,7 +16,7 @@ const fs = require('fs');
 const minimist = require('minimist');
 const axios = require('axios');
 
-let db;
+let db, env;
 
 // SSL options for HTTPS
 const sslOptions = {
@@ -58,7 +58,7 @@ function setupMiddleware() {
 
     // Initialize passport
     app.use(passport.initialize());
-    app.use(passport.session());
+    app.use(passport.session(undefined));
 }
 
 // Function to set up passport strategies
@@ -69,7 +69,12 @@ function setupPassport() {
 
     passport.deserializeUser(function (id, done) {
         db.get('SELECT id, username FROM users WHERE id = ?', id, function (err, row) {
-            if (!row) return done(null, false);
+            if (err) {
+                return done(err);
+            }
+            if (!row) {
+                return done(new Error('User not found'));
+            }
             return done(null, row);
         });
     });
@@ -101,10 +106,11 @@ function setupRoutes() {
     });
 
     // Login route
+    // Login route
     app.post('/login', function (req, res) {
         const {username, password} = req.body;
 
-        db.get('SELECT password FROM users WHERE username = ?', username, function (err, row) {
+        db.get('SELECT id, password FROM users WHERE username = ?', username, function (err, row) {
             if (!row) {
                 return res.status(401).json({success: false, message: 'Invalid username or password'});
             }
@@ -112,6 +118,8 @@ function setupRoutes() {
             bcrypt.compare(password, row.password, function (err, result) {
                 if (result) {
                     req.session.isLoggedIn = true;
+                    req.session.passport = {user: row.id}; // Set req.session.passport.user to the logged-in user's ID
+                    req.session.save();
                     return res.json({success: true});
                 } else {
                     return res.status(401).json({success: false, message: 'Invalid username or password'});
@@ -120,7 +128,8 @@ function setupRoutes() {
         });
     });
 
-    // Logout route
+
+// Logout route
     app.post('/logout', function (req, res) {
         req.logout(function (err) {
             if (err) {
@@ -128,10 +137,14 @@ function setupRoutes() {
                 console.error(err);
                 return res.json({success: false});
             }
-            // If logout was successful, set the session variables to false
-            req.session.isLoggedIn = false;
-            req.session.isAuthenticated = false;
-            res.json({success: true});
+            req.session.destroy(function (err) {
+                if (err) {
+                    // Handle error
+                    console.error(err);
+                    return res.json({success: false});
+                }
+                res.json({success: true});
+            });
         });
     });
 
@@ -154,59 +167,67 @@ function setupRoutes() {
 
         // Create a random connectionId 3-digit number
         const connectionId = Math.floor(Math.random() * 900) + 100;
+        console.log("Sent connectionId: ", connectionId); // Print the connectionId that you're sending
+
 
         // Send GET request to the coral's HTTP server
-        axios.get(`http://${coralIP}/${connectionId}`)
+        axios.get(`http://${coralIP}/?connectionId=${connectionId}`)
             .then(response => {
+                console.log("Received response: ", response.data); // Print the entire received response
+
+                // Change response.date.connectionId to a number
+                response.data.connectionId = parseInt(response.data.connectionId);
+
                 // Check if the connectionId in the response matches the one we sent
                 if (response.data.connectionId !== connectionId) {
                     console.log('ConnectionId mismatch');
-                    return res.status(401).json({ success: false, message: 'ConnectionId mismatch' });
+                    return res.status(401).json({success: false, message: 'ConnectionId mismatch'});
                 }
 
                 // Check the status in the response
                 if (response.data.status === 0) {
                     console.log('Coral error');
-                    return res.status(500).json({ success: false, message: 'Coral error' });
+                    return res.status(500).json({success: false, message: 'Coral error'});
                 } else if (response.data.status === 2) {
                     console.log('Access denied');
-                    return res.status(401).json({ success: false, message: 'Access denied' });
+                    return res.status(401).json({success: false, message: 'Access denied'});
                 }
 
+                console.log('req.session.passport.user:', req.session.passport.user);
 
                 // Check the passphrase in the response
                 db.get('SELECT objectPassphrase FROM users WHERE id = ?', req.session.passport.user, function (err, row) {
                     if (err) {
                         console.error(err);
-                        return res.status(500).json({ success: false, message: 'Database error' });
+                        return res.status(500).json({success: false, message: 'Database error'});
                     }
 
                     if (!row) {
                         console.log('User not found');
-                        return res.status(401).json({ success: false, message: 'User not found' });
+                        return res.status(401).json({success: false, message: 'User not found'});
                     }
 
-                    bcrypt.compare(response.data.passphrase, row.objectPassphrase, function(err, result) {
+                    bcrypt.compare(response.data.passphrase, row.objectPassphrase, function (err, result) {
                         if (err) {
                             console.error(err);
-                            return res.status(500).json({ success: false, message: 'Error comparing passphrases' });
+                            return res.status(500).json({success: false, message: 'Error comparing passphrases'});
                         }
 
                         if (!result) {
                             console.log('Passphrase mismatch');
-                            return res.status(401).json({ success: false, message: 'Passphrase mismatch' });
+                            return res.status(401).json({success: false, message: 'Passphrase mismatch'});
                         }
 
                         // If everything checks out, the user is authenticated
                         console.log('Access granted');
                         req.session.isAuthenticated = true;
-                        res.json({ success: true });
+                        res.json({success: true});
                     });
                 });
             })
             .catch(error => {
                 console.error('Error connecting to coral:', error);
-                res.status(500).json({ success: false, message: 'Error connecting to coral' });
+                res.status(500).json({success: false, message: 'Error connecting to coral'});
             });
 
         // Set a timeout of one minute to receive the answer
@@ -214,7 +235,7 @@ function setupRoutes() {
             if (!req.session.isAuthenticated) {
                 console.log('Authentication timed out');
                 if (!res.headersSent) {
-                    res.json({ error: 'Authentication timed out' });
+                    res.json({error: 'Authentication timed out'});
                 }
             }
         }, 60000);
@@ -326,7 +347,7 @@ function startServer() {
         }
     });
 
-    let env = args.env;
+    env = args.env;
     let port = args.port;
 
     if (!args.e && !args.p) {

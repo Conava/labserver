@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import {ref, computed} from 'vue';
+import {ref, computed, watch} from 'vue';
 import axios from 'axios';
 import HomeDashboard from './components/HomeDashboard.vue'
 import Login from './components/LoginWindow.vue'
@@ -43,6 +43,16 @@ export default {
       console.log("dark mode detected");
       document.body.classList.add('dark-mode');
     }
+    // Watch for changes to darkMode and update localStorage
+    watch(darkMode, (newVal) => {
+      localStorage.setItem('theme', newVal ? 'dark' : 'light');
+      if (newVal) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    });
+
     return {
       darkMode,
       bodyClass

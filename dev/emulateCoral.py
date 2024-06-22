@@ -1,43 +1,77 @@
-import socket
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import urllib.parse
+import json
 import argparse
+import sys
 
 
-def start_server(host, port):
-    # Create a TCP/IP socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        # Bind the socket to the port
-        s.bind((host, port))
-        print(f"Server started on {host}:{port}")
+class MyHandler(BaseHTTPRequestHandler):
+    responses = [
+        {"connectionId": None, "status": 1, "passphrase": "watch"},
+        {"connectionId": None, "status": 0, "passphrase": ""},
+        {"connectionId": None, "status": 2, "passphrase": ""},
+        {"connectionId": None, "status": 1, "passphrase": "watch"},
+        {"connectionId": None, "status": 1, "passphrase": "lighter"},
+        {"connectionId": None, "status": 1, "passphrase": "hand"},
+        {"connectionId": None, "status": 1, "passphrase": "pen"},
+        {"connectionId": None, "status": 1, "passphrase": "watch"},
+        {"connectionId": None, "status": 1, "passphrase": "pointer"}
+    ]
 
-        while True:
-            # Listen for incoming connections
-            s.listen()
-            print("Waiting for a connection...")
-            connection, client_address = s.accept()
+    def do_GET(self):
+        # Print the request line
+        print(self.requestline)
 
-            try:
-                print(f"Connection from {client_address}")
-                # Receive the data in small chunks
-                data = connection.recv(16)
-                print(f"Received: {data.decode()}")
+        # Print the headers
+        print(self.headers)
 
-                # Get user input for the response message
-                message = input("Enter the message to send in response to a connection: ")
+        # If there's data sent by the client, print it
+        content_length = self.headers.get('Content-Length')
+        if content_length:
+            data = self.rfile.read(int(content_length))
+            print(data.decode())
 
-                # Send response
-                if data:
-                    print("Sending response...")
-                    connection.sendall(message.encode())
-                else:
-                    print("No data received")
+        # Parse the connectionId from the request's query parameters
+        query = urllib.parse.urlparse(self.path).query
+        query_components = dict(qc.split("=") for qc in query.split("&"))
+        connection_id = query_components.get('connectionId', '100')
 
-            finally:
-                # Clean up the connection
-                connection.close()
+        # Prompt for input and select the response
+        print("Select a response:")
+        # Print out all available responses and the reveived connectionId
+        for i, response in enumerate(self.responses):
+            print(f'{i + 1}: Connection ID: {connection_id} Status: {response["status"]} Passphrase: {response["passphrase"]}')
 
+        response_index = int(input("Enter a number from 1 to 9: ")) - 1
+        response = self.responses[response_index]
+
+        response["connectionId"] = connection_id  # Use the connectionId from the request
+        if response_index == 0:
+            response["connection_id"] = "123"
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
+        response_str = json.dumps(response)
+        self.wfile.write(response_str.encode())
+
+        # Print the response that was sent
+        print("Response sent: ", response_str)
+
+def run(server_class=HTTPServer, handler_class=MyHandler, port=80):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    print(f'Starting httpd on port {port}...')
+    httpd.serve_forever()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='TCP Server for Authentication')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--response', type=int, default=0, help='The index of the response to send back')
     args = parser.parse_args()
 
-    start_server('localhost', 44000)
+    if args.response < 0 or args.response >= len(MyHandler.responses):
+        print(f'Invalid response index. Please provide a value between 0 and {len(MyHandler.responses) - 1}.')
+        sys.exit(1)
+
+    run()
