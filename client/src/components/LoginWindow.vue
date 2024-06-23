@@ -1,21 +1,30 @@
 <template>
+  <!-- Login form container -->
   <div class="login-container">
+    <!-- Login form card -->
     <div class="card">
+      <!-- Login form title -->
       <h2>Welcome Back</h2>
+      <!-- Error message display, only visible when there is an error message -->
+      <p v-if="errorMessage">{{ errorMessage }}</p>
+      <!-- Login form -->
       <form @submit.prevent="submitForm">
+
+        <!-- Username input group -->
         <div class="input-group">
           <input id="username" type="text" v-model="username" placeholder=" ">
           <label :class="{ active: username }" for="username">Username</label>
         </div>
 
+        <!-- Password input group -->
         <div class="input-group">
           <input id="password" type="password" v-model="password" placeholder=" ">
           <label :class="{ active: password }" for="password">Password</label>
         </div>
 
+        <!-- Login button, disabled when username or password is empty -->
         <button type="submit" :disabled="isButtonDisabled">Log in</button>
       </form>
-      <p>{{ errorMessage }}</p>
     </div>
   </div>
 </template>
@@ -31,34 +40,52 @@ export default {
     }
   },
   computed: {
+    // Computed property to check if the login button should be disabled
     isButtonDisabled() {
       return !this.username || !this.password;
     }
   },
   methods: {
+    // Method to handle form submission
     async submitForm() {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: this.username,
-          password: this.password
-        })
-      });
-      const data = await response.json();
-      console.log('Response text:', data);
+      try {
+        // Send login request to the server
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password
+          })
+        });
 
-      if (response.status === 401) {
-        // Display the error message
-        this.errorMessage = data.message;
-        this.username = '';
-        this.password = '';
-      } else if (data.success) {
-        this.$emit('login', true);
-      } else {
-        // Handle other cases
+        // Check if the response is OK
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Response text:', data);
+
+          // Check if the login was successful
+          if (data.success) {
+            // Emit login event
+            this.$emit('login', true);
+          } else {
+            // Handle login failure
+            this.errorMessage = data.message;
+            this.username = '';
+            this.password = '';
+          }
+        } else if (response.status === 401) {
+          // Handle unauthorized access
+          const data = await response.json();
+          this.errorMessage = data.message;
+          this.username = '';
+          this.password = '';
+        }
+      } catch (error) {
+        // Handle network errors
+        console.error('Network error:', error);
       }
     }
   }
@@ -66,6 +93,19 @@ export default {
 </script>
 
 <style scoped>
+p {
+  color: #a61a1a;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  margin-top: 20px;
+  border-radius: 5px;
+  padding: 10px 10px;
+  outline: none;
+  text-align: center;
+}
+
 button {
   display: inline-block;
   padding: .75rem 1.25rem;
@@ -78,7 +118,8 @@ button {
   position: relative;
   overflow: hidden;
   z-index: 1;
-  margin-bottom: 20px;
+  margin-bottom: 0;
+
   &:after {
     content: '';
     position: absolute;
@@ -90,6 +131,7 @@ button {
     border-radius: 10rem;
     z-index: -2;
   }
+
   &:before {
     content: '';
     position: absolute;
@@ -102,8 +144,10 @@ button {
     border-radius: 10rem;
     z-index: -1;
   }
+
   &:hover {
     color: #fff;
+
     &:before {
       width: 100%;
     }
@@ -111,9 +155,9 @@ button {
 }
 
 button:disabled {
-  background-color: var(--button-background-color); /* Dark Grey */
+  background-color: var(--button-background-color);
   cursor: not-allowed;
-  pointer-events: none; /* Disable all mouse events */
+  pointer-events: none;
 }
 
 button:disabled:before {
@@ -168,7 +212,7 @@ button:disabled:after {
   position: absolute;
   top: 0;
   left: 20px;
-  padding: 10px 0;
+  padding: 12px 0;
   pointer-events: none;
   transition: 0.3s;
   color: var(--text-color);
