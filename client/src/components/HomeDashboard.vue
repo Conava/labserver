@@ -9,8 +9,12 @@
     <!-- Rows of cards -->
     <div class="card-row" v-for="(row, index) in cardRows" :key="index">
       <div class="card" v-for="card in row" :key="card.id">
-        <h1 class="centered-label">{{ card.title }}</h1>
-        <p>{{ card.content }}</p>
+        <div v-for="element in card.elements" :key="element.content">
+          <p v-if="element.type === 'text'">{{ element.content }}</p>
+          <img v-if="element.type === 'image'" :src="element.content" alt="Card image">
+          <button v-if="element.type === 'button'" @click="performAction(element.content.action)">{{ element.content.text }}</button>
+          <a v-if="element.type === 'link'" :href="element.content.url">{{ element.content.text }}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -44,14 +48,24 @@ export default {
   methods: {
     async fetchCards() {
       if (this.$store.state.isAuthenticated) {
-        const response = await fetch('/api/cards', {
+        const response = await fetch('/cards', {
           headers: {
             'Authorization': `Bearer ${this.$store.state.token}`,
           },
         });
+        console.log(response);
         if (response.ok) {
           this.cards = await response.json();
         }
+      }
+    },
+    performAction(action) {
+      // Perform the desired action based on the action parameter
+      if (action.startsWith('http')) {
+        window.location.href = action;
+      } else {
+        // Handle other types of actions
+        console.log('Action:', action);
       }
     },
   },
@@ -70,6 +84,8 @@ export default {
 }
 
 .card {
+  flex: 1;
+  max-width: calc(33.33% - 20px); /* 33.33% for each card, minus the margin */
   border-radius: 10px;
   margin: 10px;
   padding: 20px;
@@ -77,8 +93,13 @@ export default {
   color: var(--card-text-color);
 }
 
-.full-width {
+.main-card {
   width: 100%;
+  border-radius: 10px;
+  margin: 10px 0;
+  padding: 20px;
+  background-color: var(--card-background-color);
+  color: var(--card-text-color);
 }
 
 .centered-label {

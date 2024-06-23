@@ -148,10 +148,39 @@ function setupRoutes() {
         });
     });
 
-    // Protected route
-    app.get('/protected', ensureAuthenticated, function (req, res) {
-        // This route is only accessible to authenticated users
-        res.json({success: true, message: 'You are viewing a protected route'});
+    // Protected content delivery for Homepage
+    app.get('/cards', (req, res) => {
+        console.log('GET /cards');
+        // Check for authentication
+        if (!req.session.isAuthenticated) {
+            return res.status(401).json({message: 'Not authenticated.'});
+        }
+
+        // Send 3 example cards
+        res.json([
+            {
+                id: 1,
+                elements: [
+                    {type: 'text', content: 'This is card 1.'},
+                    {type: 'button', content: {text: 'Click me', action: '/path/to/action'}},
+                ],
+            },
+            {
+                id: 2,
+                elements: [
+                    {type: 'text', content: 'This is card 2.'},
+                    {type: 'button', content: {text: 'Click me', action: '/path/to/action'}},
+                ],
+            },
+            {
+                id: 3,
+                elements: [
+                    {type: 'text', content: 'This is card 3.'},
+                    {type: 'button', content: {text: 'Click me', action: '/path/to/action'}},
+
+                ],
+            },
+        ]);
     });
 
     //Coral authentication route
@@ -250,14 +279,6 @@ function setupRoutes() {
         }
         res.end(`Number of views: ${req.session.views}`);
     });
-}
-
-function ensureAuthenticated(req, res, next) {
-    if (req.session.isAuthenticated) {
-        next();
-    } else {
-        res.status(401).json({success: false, message: 'You are not authenticated'});
-    }
 }
 
 // Function to initialize the database

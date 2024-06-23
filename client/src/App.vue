@@ -76,6 +76,7 @@ export default {
         if (response.data.success) {
           this.isAuthenticated = true;
           console.log('Authentication successful');
+          this.$store.commit('setIsAuthenticated', true);
         } else {
           console.log('Authentication failed');
           // Handle authentication failure
