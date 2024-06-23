@@ -1,8 +1,9 @@
 <template>
   <div class="dashboard">
     <!-- Full-width card for the title -->
-    <div class="card full-width">
-      <h1 class="centered-label">Erfolgreich eingeloggt im Laboratory Vault :)</h1>
+    <div class="main-card">
+      <!-- Greet the user with his name -->
+      <h1 class="centered-label">Welcome to your Home Dashboard, {{ username }}</h1>
     </div>
 
     <!-- Rows of cards -->
@@ -16,8 +17,16 @@
 </template>
 
 <script>
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+
 export default {
   name: 'HomeDashboard',
+  setup() {
+    const store = useStore();
+    const username = computed(() => store.state.username);
+    return { username };
+  },
   data() {
     return {
       cards: [],

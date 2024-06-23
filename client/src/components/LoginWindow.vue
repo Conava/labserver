@@ -69,6 +69,7 @@ export default {
           // Check if the login was successful
           if (data.success) {
             // Emit login event
+            this.$store.commit('setUsername', this.username);
             this.$emit('login', true);
           } else {
             // Handle login failure
