@@ -43,7 +43,8 @@ header {
   align-items: center;
   background-color: var(--header-background-color);
   color: var(--text-color);
-  border-bottom: 1px solid grey;
+  border-bottom: 1px;
+  border-color: var(--card-border-color);
 }
 
 header h1 {
@@ -55,5 +56,9 @@ header h1 {
   /* Adjust the width and height to match the logout button */
   width: 70px;
   height: 20px;
+}
+
+button {
+  margin: 20px;
 }
 </style>

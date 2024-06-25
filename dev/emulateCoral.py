@@ -18,7 +18,8 @@ class MyHandler(BaseHTTPRequestHandler):
         {"connectionId": None, "status": 1, "passphrase": "pointer"}
     ]
 
-    def do_GET(self):
+def do_GET(self):
+    try:
         # Print the request line
         print(self.requestline)
 
@@ -33,7 +34,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # Parse the connectionId from the request's query parameters
         query = urllib.parse.urlparse(self.path).query
-        query_components = dict(qc.split("=") for qc in query.split("&"))
+        query_components = dict(qc.split("=") for qc in query.split("&") if '=' in qc)
         connection_id = query_components.get('connectionId', '100')
 
         # Prompt for input and select the response
@@ -58,6 +59,8 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # Print the response that was sent
         print("Response sent: ", response_str)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def run(server_class=HTTPServer, handler_class=MyHandler, port=80):
     server_address = ('', port)

@@ -1,14 +1,14 @@
 <template>
   <div class="dashboard">
     <!-- Full-width card for the title -->
-    <div class="main-card">
+    <div class="main-card card">
       <!-- Greet the user with his name -->
       <h1 class="centered-label">Welcome to your Home Dashboard, {{ username }}</h1>
     </div>
 
     <!-- Rows of cards -->
     <div class="card-row" v-for="(row, index) in cardRows" :key="index">
-      <div class="card" v-for="card in row" :key="card.id">
+      <div class="content-card card" v-for="card in row" :key="card.id">
         <div v-for="element in card.elements" :key="element.content">
           <p v-if="element.type === 'text'">{{ element.content }}</p>
           <img v-if="element.type === 'image'" :src="element.content" alt="Card image">
@@ -83,23 +83,13 @@ export default {
   overflow: hidden;
 }
 
-.card {
+.content-card {
   flex: 1;
   max-width: calc(33.33% - 20px); /* 33.33% for each card, minus the margin */
-  border-radius: 10px;
-  margin: 10px;
-  padding: 20px;
-  background-color: var(--card-background-color);
-  color: var(--card-text-color);
 }
 
 .main-card {
-  width: 100%;
-  border-radius: 10px;
-  margin: 10px 0;
-  padding: 20px;
-  background-color: var(--card-background-color);
-  color: var(--card-text-color);
+  max-width: calc(100% - 40px);
 }
 
 .centered-label {
