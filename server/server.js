@@ -49,7 +49,7 @@ function setupMiddleware() {
         resave: false,
         saveUninitialized: true,
         cookie: {
-            secure: false, //todo: Set to true in a production environment to ensure cookies are only sent over HTTPS
+            secure: true,
             httpOnly: true,
             sameSite: true,
             maxAge: 5 * 60 * 1000 // 5 minutes
@@ -190,7 +190,7 @@ function setupRoutes() {
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
         } else {
-            coralIP = '192.168.2.10';
+            coralIP = '192.168.4.10';
         }
 
         // Create a random connectionId 3-digit number
