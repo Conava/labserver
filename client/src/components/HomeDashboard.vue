@@ -10,6 +10,7 @@
     <div class="card-row" v-for="(row, index) in cardRows" :key="index">
       <div class="content-card card" v-for="card in row" :key="card.id">
         <div v-for="element in card.elements" :key="element.content">
+          <h3 v-if="element.type === 'title'">{{ element.content }}</h3>
           <p v-if="element.type === 'text'">{{ element.content }}</p>
           <img v-if="element.type === 'image'" :src="element.content" alt="Card image">
           <button v-if="element.type === 'button'" @click="performAction(element.content.action)">{{ element.content.text }}</button>
