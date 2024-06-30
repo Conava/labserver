@@ -27,6 +27,16 @@ const sslOptions = {
 // Initialize express app
 const app = express();
 
+// Check if users.db exists
+fs.access(path.join(__dirname, 'users.db'), fs.constants.F_OK, (err) => {
+    // If users.db does not exist, initialize the database and add users
+    if (err) {
+        console.log('users.db does not exist. Initializing database and adding users...');
+        const initializeDatabase = require('./initializeDatabase.js');
+        initializeDatabase();
+    }
+});
+
 // Function to set up middleware
 function setupMiddleware() {
 
@@ -49,7 +59,7 @@ function setupMiddleware() {
         resave: false,
         saveUninitialized: true,
         cookie: {
-            secure: true,
+            secure: false,
             httpOnly: true,
             sameSite: true,
             maxAge: 5 * 60 * 1000 // 5 minutes
@@ -58,7 +68,7 @@ function setupMiddleware() {
 
     // Initialize passport
     app.use(passport.initialize());
-    app.use(passport.session(undefined));
+    app.use(passport.session());
 }
 
 // Function to set up passport strategies
@@ -118,7 +128,7 @@ function setupRoutes() {
                 if (result) {
                     req.session.isLoggedIn = true;
                     req.session.passport = {user: row.id}; // Set req.session.passport.user to the logged-in user's ID
-                    req.session.save();
+                    console.log('req.session.passport.user set:', req.session.passport.user);
                     return res.json({success: true});
                 } else {
                     return res.status(401).json({success: false, message: 'Invalid username or password'});
@@ -126,7 +136,6 @@ function setupRoutes() {
             });
         });
     });
-
 
 // Logout route
     app.post('/logout', function (req, res) {
@@ -185,7 +194,6 @@ function setupRoutes() {
     //Coral authentication route
     app.post('/authenticate', function (req, res) {
         console.log("Authenticating...");
-        // todo: replace with actual port and IP in production
         let coralIP;
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
@@ -242,6 +250,9 @@ function setupRoutes() {
                         return res.json({success: true});
                     }
 
+                    console.log('Passphrase:', response.data.passphrase);
+                    console.log('Object passphrase:', row.objectPassphrase);
+
                     bcrypt.compare(response.data.passphrase, row.objectPassphrase, function (err, result) {
                         if (err) {
                             console.error(err);
@@ -290,72 +301,6 @@ function setupRoutes() {
         res.end(`Number of views: ${req.session.views}`);
     });
 }
-
-// Function to initialize the database
-function initializeDatabase() {
-    // Initialize the database
-    db = new sqlite3.Database('./users.db', (err) => {
-        if (err) {
-            console.error(err.message);
-        }
-        console.log('Connected to the users database.');
-    });
-
-    // Create the users table if it doesn't exist
-    db.run(`CREATE TABLE IF NOT EXISTS users
-            (
-                id
-                    INTEGER
-                    PRIMARY
-                        KEY
-                    AUTOINCREMENT,
-                username
-                    TEXT
-                    NOT
-                        NULL
-                    UNIQUE,
-                password
-                    TEXT
-                    NOT
-                        NULL,
-                objectPassphrase
-                    TEXT
-            )`, (err) => {
-        if (err) {
-            console.error(err.message);
-        }
-        console.log('Users table created or already exists.');
-    });
-}
-
-function addUser(username, password, objectPassphrase) {
-    bcrypt.hash(password, 10, function (err, passwordHash) {
-        if (err) {
-            return console.error(err);
-        }
-        bcrypt.hash(objectPassphrase, 10, function (err, passphraseHash) {
-            if (err) {
-                return console.error(err);
-            }
-            db.run(`INSERT INTO users(username, password, objectPassphrase)
-                    VALUES (?, ?, ?)`, [username, passwordHash, passphraseHash], function (err) {
-                if (err) {
-                    return console.error(err.message);
-                }
-                console.log(`User added with ID: ${this.lastID}`);
-            });
-        });
-    });
-}
-
-// todo: remove this in production. Uncomment if users.db not present
-
-addUser('admin', 'nimda', 'any');
-addUser('Marlon', 'nimda', 'lighter');
-addUser('Silas', 'nimda', 'hand');
-addUser('Oskar', 'nimda', 'pen');
-addUser('Laurin', 'nimda', 'watch');
-addUser('Ludwig', 'nimda', 'pointer');
 
 
 /*
@@ -419,5 +364,4 @@ function startServer() {
 setupMiddleware();
 setupPassport();
 setupRoutes();
-initializeDatabase();
 startServer();

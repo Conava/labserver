@@ -56,7 +56,8 @@ class MyHandler(BaseHTTPRequestHandler):
             # Send a response body
             response = {
                 'connectionId': int(connection_id),
-                'status': 1  # You can modify this status based on your logic
+                'status': response["status"],  # Use the status from the selected response
+                'passphrase': response["passphrase"]  # Use the passphrase from the selected response
             }
             self.wfile.write(json.dumps(response).encode())
 
