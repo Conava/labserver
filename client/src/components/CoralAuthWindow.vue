@@ -5,11 +5,7 @@
       <p>Please click the button below to start the authentication process.</p>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       <div class="loading-container">
-        <div class="loading-symbol">
-          <div v-if="isLoading" class="loading">
-            <div v-for="i in 8" :key="i" class="dot"></div>
-          </div>
-        </div>
+          <div class="loading-symbol" ref="loading" v-show="isLoading"></div>
       </div>
       <div>
         <button @click="authenticate">Start Authentication</button>
@@ -20,17 +16,20 @@
 
 <script>
 import axios from "axios";
+import { Spinner } from 'spin.js';
 
 export default {
   data() {
     return {
       isLoading: false,
-      errorMessage: ''
+      errorMessage: '',
+      spinner: null
     }
   },
   methods: {
     async authenticate() {
       this.isLoading = true;
+      this.spinner = new Spinner().spin(this.$refs.loading);
       try {
         const response = await axios.post('/authenticate', {
           headers: {
@@ -61,6 +60,7 @@ export default {
           this.errorMessage = error.message;
         }
       } finally {
+        this.spinner.stop();
         this.isLoading = false;
       }
     }
@@ -69,6 +69,20 @@ export default {
 </script>
 
 <style scoped>
+[ref="loading"] {
+  width: 50px;
+  height: 50px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-symbol {
+  animation: spin 4s linear infinite;
+}
+
 .card {
   width: 400px;
   padding: 20px;
@@ -85,57 +99,13 @@ button {
   justify-content: center;
   align-items: center;
   height: 100px;
-  width: 100px;
+  width: 100%;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 70px;
-  height: 70px;
+.loading-symbol {
+  width: 100%;
+  height: 100%;
   position: relative;
-  animation: rotate 2s linear infinite;
-}
-
-.dot {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: var(--accent-color);
-  border-radius: 50%;
-}
-
-.dot:nth-child(1) {
-  transform: rotate(0deg) translate(35px);
-}
-
-.dot:nth-child(2) {
-  transform: rotate(45deg) translate(35px);
-}
-
-.dot:nth-child(3) {
-  transform: rotate(90deg) translate(35px);
-}
-
-.dot:nth-child(4) {
-  transform: rotate(135deg) translate(35px);
-}
-
-.dot:nth-child(5) {
-  transform: rotate(180deg) translate(35px);
-}
-
-.dot:nth-child(6) {
-  transform: rotate(225deg) translate(35px);
-}
-
-.dot:nth-child(7) {
-  transform: rotate(270deg) translate(35px);
-}
-
-.dot:nth-child(8) {
-  transform: rotate(315deg) translate(35px);
 }
 
 @keyframes rotate {

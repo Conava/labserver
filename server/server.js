@@ -191,9 +191,15 @@ function setupRoutes() {
             {
                 id: 3,
                 elements: [
-                    {type: 'text', content: 'This is card 3.'},
-                    {type: 'button', content: {text: 'Click me', action: '/path/to/action'}},
-
+                    {type: 'title', content: 'Laboratory Source Code'},
+                    {type: 'text', content: 'Webserver Source Code: '},
+                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver'}},
+                    {type: 'text', content: ' '},
+                    {type: 'text', content: 'Coral Source Code: '},
+                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/coral-test'}},
+                    {type: 'text', content: ' '},
+                    {type: 'text', content: 'Handmodell Source Code: '},
+                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/handmodell'}},
                 ],
             },
         ]);
