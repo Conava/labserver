@@ -199,7 +199,7 @@ function setupRoutes() {
 
 
         // Send GET request to the coral's HTTP server
-        axios.get(`http://${coralIP}/?connectionId=${connectionId}`)
+        axios.get(`http://${coralIP}/connectionId${connectionId}`)
             .then(response => {
                 console.log("Received response: ", response.data); // Print the entire received response
 
@@ -262,7 +262,11 @@ function setupRoutes() {
             })
             .catch(error => {
                 console.error('Error connecting to coral:', error);
-                res.status(500).json({success: false, message: 'Error connecting to coral'});
+                if (error.code === 'EHOSTUNREACH') {
+                    res.status(500).json({success: false, message: 'Cannot reach the coral server. Please check the server address and try again.'});
+                } else {
+                    res.status(500).json({success: false, message: 'Error connecting to coral'});
+                }
             });
 
         // Set a timeout of one minute to receive the answer
