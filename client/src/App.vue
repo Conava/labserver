@@ -69,7 +69,7 @@ export default {
       console.log('Login successful:', success)
       this.isLoggedIn = success;
     },
-    async handleAuthentication(resolve) {
+    async handleAuthentication(payload) {
       console.log('Authenticating...');
       try {
         const response = await axios.post('/authenticate');
@@ -85,7 +85,7 @@ export default {
         console.error('Error authenticating:', error);
         // Handle error
       } finally {
-        resolve();
+        payload.resolve();
       }
     },
     async handleLogout() {
