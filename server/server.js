@@ -4,7 +4,6 @@ const session = require('express-session');
 const serveStatic = require('serve-static');
 const path = require('path');
 const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -13,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
+const sqlite3 = require('sqlite3').verbose();
 const minimist = require('minimist');
 const axios = require('axios');
 
@@ -35,6 +35,14 @@ fs.access(path.join(__dirname, 'users.db'), fs.constants.F_OK, (err) => {
         const initializeDatabase = require('./initializeDatabase.js');
         initializeDatabase();
     }
+    // Open a database connection and assign it to the db variable
+    db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
+        if (err) {
+            console.error(err.message);
+        } else {
+            console.log('Connected to the users database.');
+        }
+    });
 });
 
 // Function to set up middleware
@@ -255,13 +263,13 @@ function setupRoutes() {
 
                     bcrypt.compare(response.data.passphrase, row.objectPassphrase, function (err, result) {
                         if (err) {
-                            console.error(err);
-                            return res.status(500).json({success: false, message: 'Error comparing passphrases'});
+                            console.error('Error matching object, access denied', err);
+                            return res.status(500).json({success: false, message: 'Error matching object, access denied'});
                         }
 
                         if (!result) {
-                            console.log('Passphrase mismatch');
-                            return res.status(401).json({success: false, message: 'Passphrase mismatch'});
+                            console.log('Object mismatch, access denied');
+                            return res.status(401).json({success: false, message: 'Object mismatch, access denied'});
                         }
 
                         // If everything checks out, the user is authenticated

@@ -63,6 +63,13 @@ html, body {
   overflow: hidden;
 }
 
+.centered-component-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
 .card {
   color : var(--card-text-color);
   background-color: var(--card-background-color);
@@ -104,4 +111,17 @@ input {
 
 input:focus {
   border-color: var(--accent-color); /* Change border color on focus */
+}
+
+.error-message {
+  color: #a61a1a;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  margin-top: 20px;
+  border-radius: 5px;
+  padding: 10px 10px;
+  outline: none;
+  text-align: center;
 }

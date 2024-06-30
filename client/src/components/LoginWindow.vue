@@ -1,12 +1,12 @@
 <template>
   <!-- Login form container -->
-  <div class="login-container">
+  <div class="centered-component-container">
     <!-- Login form card -->
     <div class="card">
       <!-- Login form title -->
       <h2>Welcome Back</h2>
       <!-- Error message display, only visible when there is an error message -->
-      <p v-if="errorMessage">{{ errorMessage }}</p>
+      <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
       <!-- Login form -->
       <form @submit.prevent="submitForm">
 
@@ -94,19 +94,6 @@ export default {
 </script>
 
 <style scoped>
-p {
-  color: #a61a1a;
-  font-size: 1.2rem;
-  font-weight: bold;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  margin-top: 20px;
-  border-radius: 5px;
-  padding: 10px 10px;
-  outline: none;
-  text-align: center;
-}
-
 button {
   display: inline-block;
   padding: .75rem 1.25rem;
@@ -167,13 +154,6 @@ button:disabled:before {
 
 button:disabled:after {
   background-color: var(--button-background-color);
-}
-
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
 .card {

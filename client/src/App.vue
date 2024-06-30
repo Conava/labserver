@@ -4,7 +4,7 @@
       <app-header :is-logged-in="isLoggedIn" @logout="handleLogout"></app-header>
       <div class="main-content">
         <Login v-if="!isLoggedIn" @login="handleLogin"/>
-        <CorelAuthWindow v-else-if="isLoggedIn && !isAuthenticated" @authenticate="handleAuthentication"/>
+        <CoralAuthWindow v-else-if="isLoggedIn && !isAuthenticated" @authenticate="handleAuthentication"/>
         <HomeDashboard v-else-if="isLoggedIn && isAuthenticated" msg="Laboratory Vault entered"/>
       </div>
     </div>
@@ -16,7 +16,7 @@ import {ref, computed, watch} from 'vue';
 import axios from 'axios';
 import HomeDashboard from './components/HomeDashboard.vue'
 import Login from './components/LoginWindow.vue'
-import CorelAuthWindow from './components/CorelAuthWindow.vue'
+import CoralAuthWindow from './components/CoralAuthWindow.vue'
 import Header from "@/components/AppHeader.vue";
 
 export default {
@@ -25,7 +25,7 @@ export default {
     HomeDashboard,
     Login,
     'app-header': Header,
-    CorelAuthWindow
+    CoralAuthWindow
   },
   created() {
     axios.get('/checkAuthentication')
@@ -69,24 +69,9 @@ export default {
       console.log('Login successful:', success)
       this.isLoggedIn = success;
     },
-    async handleAuthentication(payload) {
-      console.log('Authenticating...');
-      try {
-        const response = await axios.post('/authenticate');
-        if (response.data.success) {
-          this.isAuthenticated = true;
-          console.log('Authentication successful');
-          this.$store.commit('setIsAuthenticated', true);
-        } else {
-          console.log('Authentication failed');
-          // Handle authentication failure
-        }
-      } catch (error) {
-        console.error('Error authenticating:', error);
-        // Handle error
-      } finally {
-        payload.resolve();
-      }
+    handleAuthentication(success) {
+      console.log('Authentication successful:', success);
+      this.isAuthenticated = success;
     },
     async handleLogout() {
       try {
