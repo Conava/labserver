@@ -17,6 +17,7 @@
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "fetch-blob": "^4.0.0",
     "jsonwebtoken": "^9.0.2",
     "minimist": "^1.2.8",
     "passport": "^0.7.0",

@@ -15,6 +15,7 @@ const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const minimist = require('minimist');
 const axios = require('axios');
+const { Blob } = require('fetch-blob');
 
 let db, env;
 
