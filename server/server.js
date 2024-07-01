@@ -191,7 +191,7 @@ function setupRoutes() {
                 id: 1,
                 elements: [
                     {type: 'text', content: 'Authentication Image from the coral:'},
-                    {type: 'image', content: 'data:image/jpeg;base64,${imageData}'},
+                    {type: 'image', content: 'data:image/jpeg;base64' + imageData},
                 ],
             },
             {
