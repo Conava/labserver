@@ -172,13 +172,26 @@ function setupRoutes() {
             return res.status(401).json({message: 'Not authenticated.'});
         }
 
+        let imageData;
+        try {
+            const response = axios({
+                method: 'get',
+                url: 'http://192.168.4.10/camera_stream',
+                responseType: 'arraybuffer'
+            });
+            // Convert the image data to a Base64 string
+            imageData = Buffer.from(response.data, 'binary').toString('base64');
+        } catch (error) {
+            console.error('Error fetching image:', error);
+        }
+
         // Send 3 example cards
         res.json([
             {
                 id: 1,
                 elements: [
-                    {type: 'text', content: 'This is card 1.'},
-                    {type: 'button', content: {text: 'Click me', action: '/path/to/action'}},
+                    {type: 'text', content: 'Authentication Image from the coral:'},
+                    {type: 'image', content: 'data:image/jpeg;base64,${imageData}'},
                 ],
             },
             {
@@ -193,13 +206,31 @@ function setupRoutes() {
                 elements: [
                     {type: 'title', content: 'Laboratory Source Code'},
                     {type: 'text', content: 'Webserver Source Code: '},
-                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver'}},
+                    {
+                        type: 'button',
+                        content: {
+                            text: 'Go to GitLab',
+                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver'
+                        }
+                    },
                     {type: 'text', content: ' '},
                     {type: 'text', content: 'Coral Source Code: '},
-                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/coral-test'}},
+                    {
+                        type: 'button',
+                        content: {
+                            text: 'Go to GitLab',
+                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/coral-test'
+                        }
+                    },
                     {type: 'text', content: ' '},
                     {type: 'text', content: 'Handmodell Source Code: '},
-                    {type: 'button', content: {text: 'Go to GitLab', action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/handmodell'}},
+                    {
+                        type: 'button',
+                        content: {
+                            text: 'Go to GitLab',
+                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/handmodell'
+                        }
+                    },
                 ],
             },
         ]);
@@ -270,7 +301,10 @@ function setupRoutes() {
                     bcrypt.compare(response.data.passphrase, row.objectPassphrase, function (err, result) {
                         if (err) {
                             console.error('Error matching object, access denied', err);
-                            return res.status(500).json({success: false, message: 'Error matching object, access denied'});
+                            return res.status(500).json({
+                                success: false,
+                                message: 'Error matching object, access denied'
+                            });
                         }
 
                         if (!result) {
@@ -288,7 +322,10 @@ function setupRoutes() {
             .catch(error => {
                 console.error('Error connecting to coral:', error);
                 if (error.code === 'EHOSTUNREACH') {
-                    res.status(500).json({success: false, message: 'Cannot reach the coral server. Please check the server address and try again.'});
+                    res.status(500).json({
+                        success: false,
+                        message: 'Cannot reach the coral server. Please check the server address and try again.'
+                    });
                 } else {
                     res.status(500).json({success: false, message: 'Error connecting to coral'});
                 }
