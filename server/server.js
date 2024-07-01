@@ -177,10 +177,14 @@ function setupRoutes() {
             const response = axios({
                 method: 'get',
                 url: 'http://192.168.4.10/camera_stream',
-                responseType: 'arraybuffer'
+                responseType: 'blob'
             });
             // Convert the image data to a Base64 string
-            imageData = Buffer.from(response.data, 'binary').toString('base64');
+            const reader = new FileReader();
+            reader.readAsDataURL(response.data);
+            reader.onloadend = function() {
+                imageData = reader.result.split(',')[1];
+            }
         } catch (error) {
             console.error('Error fetching image:', error);
         }
