@@ -18,26 +18,44 @@
 
 /* Define your dark theme colors */
 body.dark-mode {
-  --background-color: #1a1a1a;
-  --card-border-color: #555;
-  --header-background-color: #333333; /* Dark Grey */
-  --text-color: #f0f0f0; /* Light Grey */
-  --card-background-color: #444444; /* Slightly Lighter Dark Grey */
-  --card-text-color: #f0f0f0; /* Light Grey */
-  --button-background-color: #555555; /* Dark Grey */
-  --button-text-color: #f0f0f0; /* Light Grey */
-  --button-hover-background-color: #333333; /* Darker Grey */
-  --button-hover-text-color: #f0f0f0; /* Light Grey */
-  --input-text-color: #f0f0f0; /* Light Grey */
-  --input-border-color: #555;
-  --accent-color: #007BFF; /* Dark Blue */
-  --accent-color2: #0851a9;
-  --input-background-color: #333333; /* Dark Grey */
+  /* Accent color */
+  --accent-color: #007BFF;
+  --accent-color-darkened: #0851a9;
+
+  /* Background */
+  --background-color: #121212;
+
+  /* Header */
+  --header-background-color: #1E1E1E;
+  --header-font-color: #FFFFFF;
+
+  /* Cards */
+  --card-background-color: #1E1E1E;
+  --card-border-color: #292929;
+  --card-font-color: #f0f0f0;
+
+
+  /* Input Fields */
+  --input-background-color: #2C2C2C;
+  --input-border-color: #3A3A3A;
+  --input-font-color: #FFFFFF;
+  --input-placeholder-color: #B0B0B0;
+
+  /* Buttons */
+  --button-background-color: #3A3A3A;
+  --button-border-color: #4A4A4A;
+  --button-font-color: #FFFFFF;
+  --button-hover-background-color: #505050;
+  --button-hover-font-color: #FFFFFF;
+
+  /* Fonts */
+  --primary-font-color: #E0E0E0;
+  --secondary-font-color: #B0B0B0;
 }
 
 body {
   background-color: var(--background-color);
-  color: var(--text-color);
+  color: var(--primary-font-color);
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -71,7 +89,7 @@ html, body {
 }
 
 .card {
-  color : var(--card-text-color);
+  color : var(--card-font-color);
   background-color: var(--card-background-color);
   border: 1px solid var(--card-border-color);
   border-radius: 6px;
@@ -82,7 +100,7 @@ html, body {
 
 button {
   background-color: var(--button-background-color);
-  color: var(--button-text-color);
+  color: var(--button-font-color);
   border: none;
   padding: 10px 20px;
   text-align: center;
@@ -97,11 +115,11 @@ button {
 
 button:hover {
   background-color: var(--button-hover-background-color);
-  color: var(--button-hover-text-color);
+  color: var(--button-hover-font-color);
 }
 input {
   background-color: var(--input-background-color);
-  color: var(--input-text-color);
+  color: var(--input-font-color);
   border: 1px solid var(--input-border-color);
   border-radius: 20px; /* Rounded corners */
   padding: 10px 15px; /* Padding inside the input field */
