@@ -1,36 +1,37 @@
 <template>
   <div class="dashboard">
-    <!-- Full-width card for the title -->
     <div class="main-card card">
-      <!-- Greet the user with his name -->
       <h1 class="centered-label">Welcome to your Home Dashboard, {{ username }}</h1>
     </div>
-
-    <!-- Rows of cards -->
     <div class="card-row" v-for="(row, index) in cardRows" :key="index">
       <div class="content-card card" v-for="card in row" :key="card.id">
         <div v-for="element in card.elements" :key="element.content">
           <h3 v-if="element.type === 'title'">{{ element.content }}</h3>
           <p v-if="element.type === 'text'">{{ element.content }}</p>
           <img v-if="element.type === 'image'" :src="element.content" alt="Card image">
-          <button v-if="element.type === 'button'" @click="performAction(element.content.action)">{{ element.content.text }}</button>
-          <a v-if="element.type === 'link'" :href="element.content.url">{{ element.content.text }}</a>
-        </div>
+          <button v-if="element.type === 'button'" @click="performAction(element.content.action)">
+            {{ element.content.text }}
+          </button>
+          <a v-if="element.type === 'link'" :href="element.content.url" target="_blank"
+             rel="noopener noreferrer">{{ element.content.text }}</a></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import {computed} from 'vue';
+import {mapActions, useStore} from 'vuex';
 
 export default {
   name: 'HomeDashboard',
   setup() {
     const store = useStore();
-    const username = computed(() => store.state.username);
-    return { username };
+    const username = computed(() => store.getters.username);
+    const isAuthenticated = computed(() => store.getters.isAuthenticated);
+    const storeCards = computed(() => store.state.cards); // Access cards from the store
+
+    return {username, isAuthenticated, storeCards};
   },
   data() {
     return {
@@ -47,38 +48,38 @@ export default {
     },
   },
   methods: {
-    async fetchCards() {
-      if (this.$store.state.isAuthenticated) {
-        const response = await fetch('/cards', {
-          headers: {
-            'Authorization': `Bearer ${this.$store.state.token}`,
-          },
-        });
-        console.log(response);
-        if (response.ok) {
-          this.cards = await response.json();
-        }
-      }
-    },
+    ...mapActions(['fetchCardsVuex']),
+
     performAction(action) {
       // Perform the desired action based on the action parameter
       if (action.startsWith('http')) {
+        // Redirect to the URL in a new tab
+        window.open(action, "_blank");
+      } else if (action.startsWith('/')) {
         window.location.href = action;
-      }
-      else if (action.startsWith('/')) {
-        window.location.href = action;
-      }
-      else {
+      } else {
         // Handle other types of actions
         console.log('Action:', action);
       }
     },
   },
   created() {
-    this.fetchCards();
+    this.fetchCardsVuex();
+    console.log('HomeDashboard created, fetch cards executed');
+  },
+  mounted() {
+    // Watch for changes in the store's cards and update the local cards accordingly
+    this.$watch(
+        () => this.storeCards,
+        (newCards) => {
+          this.cards = newCards;
+        },
+        { immediate: true }
+    );
   },
 };
 </script>
+
 
 <style scoped>
 .dashboard {

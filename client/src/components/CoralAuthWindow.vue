@@ -8,15 +8,15 @@
           <div class="loading-symbol" ref="loading" v-show="isLoading"></div>
       </div>
       <div>
-        <button @click="authenticate">Start Authentication</button>
+        <button @click="authenticate" :disabled="isLoading">Start Authentication</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-import { Spinner } from 'spin.js';
+import {mapActions} from 'vuex';
+import {Spinner} from 'spin.js';
 
 export default {
   data() {
@@ -24,45 +24,20 @@ export default {
       isLoading: false,
       errorMessage: '',
       spinner: null
-    }
+    };
   },
   methods: {
+    ...mapActions(['authenticateVuex']),
     async authenticate() {
       this.isLoading = true;
+      this.errorMessage = '';
       this.spinner = new Spinner().spin(this.$refs.loading);
-      try {
-        const response = await axios.post('/authenticate', {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        if (response.status === 200) {
-          const data = response.data;
-          if (data.success) {
-            this.isAuthenticated = true;
-            console.log('Authentication successful');
-            this.$store.commit('setIsAuthenticated', true);
-            this.$emit('authenticate', true);
-          } else {
-            console.log('Authentication failed');
-            this.errorMessage = data.message;
-          }
-        } else if (response.status === 401) {
-          const data = await response.json();
-          this.errorMessage = data.message;
-        }
-      } catch (error) {
-        console.error('Error authenticating:', error);
-        // Check if error.response exists and if it has data.message
-        if (error.response && error.response.data && error.response.data.message) {
-          this.errorMessage = error.response.data.message;
-        } else {
-          this.errorMessage = error.message;
-        }
-      } finally {
-        this.spinner.stop();
-        this.isLoading = false;
+      const result = await this.authenticateVuex();
+      if (!result.success) {
+        this.errorMessage = result.message;
       }
+      this.spinner.stop();
+      this.isLoading = false;
     }
   }
 };

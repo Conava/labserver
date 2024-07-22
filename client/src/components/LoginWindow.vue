@@ -1,28 +1,17 @@
 <template>
-  <!-- Login form container -->
   <div class="centered-component-container">
-    <!-- Login form card -->
     <div class="card">
-      <!-- Login form title -->
       <h2>Welcome Back</h2>
-      <!-- Error message display, only visible when there is an error message -->
       <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
-      <!-- Login form -->
       <form @submit.prevent="submitForm">
-
-        <!-- Username input group -->
         <div class="input-group">
           <input id="username" type="text" v-model="username" placeholder=" ">
           <label :class="{ active: username }" for="username">Username</label>
         </div>
-
-        <!-- Password input group -->
         <div class="input-group">
           <input id="password" type="password" v-model="password" placeholder=" ">
           <label :class="{ active: password }" for="password">Password</label>
         </div>
-
-        <!-- Login button, disabled when username or password is empty -->
         <button type="submit" :disabled="isButtonDisabled">Log in</button>
       </form>
     </div>
@@ -30,6 +19,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'LoginWindow',
   data() {
@@ -37,56 +28,23 @@ export default {
       username: '',
       password: '',
       errorMessage: ''
-    }
+    };
   },
   computed: {
-    // Computed property to check if the login button should be disabled
     isButtonDisabled() {
       return !this.username || !this.password;
     }
   },
   methods: {
-    // Method to handle form submission
+    ...mapActions(['loginVuex']),
     async submitForm() {
-      try {
-        // Send login request to the server
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            username: this.username,
-            password: this.password
-          })
-        });
-
-        // Check if the response is OK
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Response text:', data);
-
-          // Check if the login was successful
-          if (data.success) {
-            // Emit login event
-            this.$store.commit('setUsername', this.username);
-            this.$emit('login', true);
-          } else {
-            // Handle login failure
-            this.errorMessage = data.message;
-            this.username = '';
-            this.password = '';
-          }
-        } else if (response.status === 401) {
-          // Handle unauthorized access
-          const data = await response.json();
-          this.errorMessage = data.message;
-          this.username = '';
-          this.password = '';
-        }
-      } catch (error) {
-        // Handle network errors
-        console.error('Network error:', error);
+      const { success, message } = await this.loginVuex({ username: this.username, password: this.password });
+      if (!success) {
+        this.errorMessage = message;
+        this.username = '';
+        this.password = '';
+      } else {
+        this.errorMessage = ''; // Clear any previous error message
       }
     }
   }

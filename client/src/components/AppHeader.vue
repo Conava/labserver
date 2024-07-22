@@ -1,36 +1,30 @@
 <template>
   <header>
-    <button v-if="isLoggedIn" @click="logout">Logout</button>
+    <button v-if="isLoggedIn" @click="logoutButtonClick">Logout</button>
     <div v-else class="placeholder"></div>
     <h1>Laboratory Vault</h1>
     <button @click="toggleDarkMode">
-      {{ darkMode ? 'Light Mode' : 'Dark Mode' }}
+      {{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}
     </button>
   </header>
 </template>
 
 <script>
+import {mapActions, mapState} from "vuex";
+
 export default {
-  props: ['isLoggedIn'],
-  data() {
-    return {
-      darkMode: localStorage.getItem('theme') === 'dark',
-    }
+  computed: {
+    ...mapState(['theme', "isLoggedIn"])
   },
   methods: {
+    ...mapActions(['toggleThemeVuex', 'logoutVuex']),
+
     toggleDarkMode() {
-      this.darkMode = !this.darkMode;
-      if (this.darkMode) {
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.body.classList.remove('dark-mode');
-        localStorage.setItem('theme', 'light');
-      }
+      this.toggleThemeVuex();
     },
-    logout() {
-      localStorage.clear();
-      this.$emit('logout');
+
+    logoutButtonClick() {
+      this.logoutVuex();
     }
   }
 };
@@ -53,7 +47,6 @@ header h1 {
 }
 
 .placeholder {
-  /* Adjust the width and height to match the logout button */
   width: 70px;
   height: 20px;
 }

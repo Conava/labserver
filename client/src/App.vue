@@ -1,10 +1,11 @@
 <template>
   <div :class="bodyClass">
     <div id="app">
-      <app-header :is-logged-in="isLoggedIn" @logout="handleLogout"></app-header>
+      <app-header></app-header>
       <div class="main-content">
-        <Login v-if="!isLoggedIn" @login="handleLogin"/>
-        <CoralAuthWindow v-else-if="isLoggedIn && !isAuthenticated" @authenticate="handleAuthentication"/>
+        <!-- Use Vuex getters directly in the template for conditional rendering -->
+        <LoginWindow v-if="!isLoggedIn"/>
+        <CoralAuthWindow v-else-if="isLoggedIn && !isAuthenticated"/>
         <HomeDashboard v-else-if="isLoggedIn && isAuthenticated" msg="Laboratory Vault entered"/>
       </div>
     </div>
@@ -12,80 +13,32 @@
 </template>
 
 <script>
-import {ref, computed, watch} from 'vue';
-import axios from 'axios';
-import HomeDashboard from './components/HomeDashboard.vue'
-import Login from './components/LoginWindow.vue'
-import CoralAuthWindow from './components/CoralAuthWindow.vue'
-import Header from "@/components/AppHeader.vue";
+import { mapActions, mapGetters } from 'vuex';
+import HomeDashboard from './components/HomeDashboard.vue';
+import LoginWindow from './components/LoginWindow.vue';
+import CoralAuthWindow from './components/CoralAuthWindow.vue';
+import Header from "./components/AppHeader.vue";
 
 export default {
   name: 'App',
   components: {
     HomeDashboard,
-    Login,
+    LoginWindow,
     'app-header': Header,
     CoralAuthWindow
   },
-  created() {
-    axios.get('/checkAuthentication')
-        .then(response => {
-          this.isLoggedIn = this.isAuthenticated = response.data.isAuthenticated;
-        })
-        .catch(error => {
-          console.error('Error checking authentication:', error);
-        });
-  },
-  setup() {
-    const darkMode = ref(localStorage.getItem('theme') === 'dark');
-    const bodyClass = computed(() => darkMode.value ? 'dark-mode' : '');
-    if (darkMode.value) {
-      console.log("dark mode detected");
-      document.body.classList.add('dark-mode');
-    }
-    // Watch for changes to darkMode and update localStorage
-    watch(darkMode, (newVal) => {
-      localStorage.setItem('theme', newVal ? 'dark' : 'light');
-      if (newVal) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    });
-
-    return {
-      darkMode,
-      bodyClass
-    };
-  },
-  data() {
-    return {
-      isLoggedIn: false,
-      isAuthenticated: false
+  computed: {
+    ...mapGetters(['isLoggedIn', 'isAuthenticated', 'theme']),
+    bodyClass() {
+      return this.theme === 'dark' ? 'dark-mode' : '';
     }
   },
   methods: {
-    handleLogin(success) {
-      console.log('Login successful:', success)
-      this.isLoggedIn = success;
-    },
-    handleAuthentication(success) {
-      console.log('Authentication successful:', success);
-      this.isAuthenticated = success;
-    },
-    async handleLogout() {
-      try {
-        const response = await axios.post('/logout');
-        if (response.data.success) {
-          this.isLoggedIn = false;
-          this.isAuthenticated = false;
-        } else {
-          // Handle logout failure
-        }
-      } catch (error) {
-        // Handle error
-      }
-    }
+    ...mapActions(['checkAuthenticationVuex']),
+  },
+  created() {
+    this.checkAuthenticationVuex();
+    document.body.className = this.theme === 'dark' ? 'dark-mode' : '';
   }
 }
 </script>
