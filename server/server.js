@@ -285,6 +285,13 @@ function setupRoutes() {
      */
     app.post('/authenticate', function (req, res) {
         console.log("Authenticating...");
+
+        // If the logged-in user is admin, skip authentication
+        if (req.user.username === 'admin') {
+            console.log('User is admin, skipping authentication');
+            req.session.isAuthenticated = true;
+            return res.json({success: true});
+        }
         let coralIP;
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
@@ -332,13 +339,6 @@ function setupRoutes() {
                     if (!row) {
                         console.log('User not found');
                         return res.status(401).json({success: false, message: 'User not found'});
-                    }
-
-                    // If the logged-in user is 'admin', grant access without checking the passphrase. For testing purposes only, username admin should be disabled in production.
-                    if (row.username === 'admin') {
-                        console.log('Access granted to admin');
-                        req.session.isAuthenticated = true;
-                        return res.json({success: true});
                     }
 
                     console.log('Passphrase:', response.data.passphrase);
@@ -440,7 +440,16 @@ async function startServer() {
         setupRoutes();
 
         const server = env === 'dev' ? http.createServer(app) : https.createServer(sslOptions, app);
+
         server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
+
+        if (env === 'prod') {
+            // Redirect HTTP to HTTPS
+            http.createServer((req, res) => {
+                res.writeHead(301, {Location: `https://${req.headers.host}${req.url}`});
+                res.end();
+            }).listen(80);
+        }
     } catch (error) {
         console.error('Failed to start server:', error);
     }
