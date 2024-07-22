@@ -240,7 +240,7 @@ function setupRoutes() {
                         type: 'link',
                         content: {
                             text: 'Go to GitLab',
-                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver'
+                            url: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver'
                         }
                     },
                     {type: 'text', content: ' '},
@@ -249,7 +249,7 @@ function setupRoutes() {
                         type: 'link',
                         content: {
                             text: 'Go to GitLab',
-                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/coral-test'
+                            url: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/coral-test'
                         }
                     },
                     {type: 'text', content: ' '},
@@ -258,7 +258,7 @@ function setupRoutes() {
                         type: 'link',
                         content: {
                             text: 'Go to GitLab',
-                            action: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/handmodell'
+                            url: 'https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/handmodell'
                         }
                     },
                 ],

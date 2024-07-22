@@ -32,6 +32,7 @@ export default {
       this.isLoading = true;
       this.errorMessage = '';
       this.spinner = new Spinner().spin(this.$refs.loading);
+      this.spinner.el.style.color = 'var(--spinner-color)';
       const result = await this.authenticateVuex();
       if (!result.success) {
         this.errorMessage = result.message;

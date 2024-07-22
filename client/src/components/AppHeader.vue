@@ -35,7 +35,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--header-background-color);
+  background-color: var(--card-background-color);
   color: var(--text-color);
   border-bottom: 1px;
   border-color: var(--card-border-color);

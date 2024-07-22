@@ -13,7 +13,7 @@
             {{ element.content.text }}
           </button>
           <a v-if="element.type === 'link'" :href="element.content.url" target="_blank"
-             rel="noopener noreferrer">{{ element.content.text }}</a></div>
+             rel="noopener noreferrer" class="button-like">{{ element.content.text }}</a></div>
       </div>
     </div>
   </div>

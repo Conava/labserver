@@ -1,38 +1,45 @@
-/* Define your light theme colors */
+/* Base (Light Theme) */
 :root {
-  --background-color: white;
-  --card-border-color: #ddd;
-  --text-color: #333333; /* Dark Grey */
-  --card-background-color: #ffffff; /* White */
-  --card-text-color: #333333; /* Dark Grey */
-  --button-background-color: #4CAF50; /* Green */
-  --button-text-color: white;
-  --button-hover-background-color: #45a049; /* Darker Green */
-  --button-hover-text-color: white;
-  --input-text-color: #333333; /* Dark Grey */
-  --input-border-color: #ddd;
-  --accent-color: #007BFF; /* Light Blue */
-  --accent-color2: #0851a9;
-  --input-background-color: #dddddd; /* Light Grey */
+  --background-color: #F0F2F5;
+  --text-color: #050505;
+  --card-background-color: #FFFFFF;
+  --card-text-color: #050505;
+    --card-border-color: #E0E0E0;
+  --button-background-color: #007BFF; /* Blue */
+  --button-text-color: #FFFFFF;
+  --button-hover-background-color: #0056b3;
+  --button-hover-text-color: #FFFFFF;
+  --input-background-color: #FFFFFF;
+  --input-text-color: #050505;
+  --input-border-color: #CCCCCC;
+  --accent-color: #4CAF50; /* Green */
+  --accent-color-light: #80E27E;
+  --accent-color-dark: #087F23;
+  --link-color: #007BFF;
+  --link-hover-color: #0056b3;
+  --spinner-color: #000;
 }
 
-/* Define your dark theme colors */
+/* Dark Theme */
 body.dark-mode {
-  --background-color: #1a1a1a;
-  --card-border-color: #555;
-  --header-background-color: #333333; /* Dark Grey */
-  --text-color: #f0f0f0; /* Light Grey */
-  --card-background-color: #444444; /* Slightly Lighter Dark Grey */
-  --card-text-color: #f0f0f0; /* Light Grey */
-  --button-background-color: #555555; /* Dark Grey */
-  --button-text-color: #f0f0f0; /* Light Grey */
-  --button-hover-background-color: #333333; /* Darker Grey */
-  --button-hover-text-color: #f0f0f0; /* Light Grey */
-  --input-text-color: #f0f0f0; /* Light Grey */
-  --input-border-color: #555;
-  --accent-color: #007BFF; /* Dark Blue */
-  --accent-color2: #0851a9;
-  --input-background-color: #333333; /* Dark Grey */
+  --background-color: #121212;
+  --text-color: #E0E0E0;
+  --card-background-color: #1E1E1E;
+  --card-text-color: #E0E0E0;
+  --card-border-color: #333333;
+  --button-background-color: #0481fd;
+  --button-text-color: #FFFFFF;
+  --button-hover-background-color: #0060DF;
+  --button-hover-text-color: #FFFFFF;
+  --input-background-color: #333333;
+  --input-text-color: #E0E0E0;
+  --input-border-color: #555555;
+  --accent-color: #22bf72;
+  --accent-color-light: #B9F6CA;
+  --accent-color-dark: #00C853;
+  --link-color: #0A84FF;
+  --link-hover-color: #0060DF;
+  --spinner-color: #fff;
 }
 
 body {
@@ -124,4 +131,26 @@ input:focus {
   padding: 10px 10px;
   outline: none;
   text-align: center;
+}
+
+a.button-like {
+  display: inline-block;
+  padding: 8px 15px;
+  margin: 5px;
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+a.button-like:hover, a.button-like:focus {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  color: #ffffff;
+  text-decoration: none;
 }
