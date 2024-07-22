@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import {mapActions} from 'vuex';
 
 export default {
   name: 'LoginWindow',
@@ -38,13 +38,22 @@ export default {
   methods: {
     ...mapActions(['loginVuex']),
     async submitForm() {
-      const { success, message } = await this.loginVuex({ username: this.username, password: this.password });
-      if (!success) {
-        this.errorMessage = message;
-        this.username = '';
-        this.password = '';
-      } else {
-        this.errorMessage = ''; // Clear any previous error message
+      try {
+        // Attempt to log in using the Vuex action 'loginVuex'
+        const response = await this.loginVuex({username: this.username, password: this.password});
+        if (!response.success) {
+          // If login is unsuccessful, display the error message and clear inputs
+          this.errorMessage = response.message;
+          this.username = '';
+          this.password = '';
+        } else {
+          // On successful login, clear any error message
+          this.errorMessage = '';
+        }
+      } catch (error) {
+        // Handle any errors that occur during the API call
+        console.error('Login error:', error);
+        this.errorMessage = error.message || 'An error occurred during login.';
       }
     }
   }
@@ -85,7 +94,7 @@ button {
     left: 0;
     width: 0;
     height: 100%;
-    background-color: var(--accent-color2);
+    background-color: var(--accent-color);
     transition: all .3s;
     border-radius: 10rem;
     z-index: -1;

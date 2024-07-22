@@ -1,6 +1,11 @@
 import {createStore} from 'vuex';
 import axios from "axios";
 
+/**
+ * Vuex store for managing application state.
+ * Includes state for login status, user authentication, theme, username, and cards.
+ * Contains mutations for updating state, actions for asynchronous operations like login, logout, and fetching data.
+ */
 export default createStore({
     state: {
         isLoggedIn: false,
@@ -10,10 +15,20 @@ export default createStore({
         cards: [],
     },
     mutations: {
+        /**
+         * Sets the login state of the user.
+         * @param {Object} state The current state of the store.
+         * @param {Object} payload Contains isLoggedIn and isAuthenticated flags.
+         */
         setLoginState(state, {isLoggedIn, isAuthenticated}) {
             state.isLoggedIn = isLoggedIn;
             state.isAuthenticated = isAuthenticated;
         },
+        /**
+         * Toggles the theme between 'dark' and 'light'.
+         * Updates the theme in localStorage and applies the corresponding class to the body.
+         * @param {Object} state The current state of the store.
+         */
         toggleTheme(state) {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('theme', state.theme);
@@ -23,17 +38,38 @@ export default createStore({
                 document.body.classList.remove('dark-mode');
             }
         },
+        /**
+         * Sets the username in the state.
+         * @param {Object} state The current state of the store.
+         * @param {string} username The username to set.
+         */
         setUsername(state, username) { // Step 2: Create setUsername mutation
             state.username = username;
         },
+        /**
+         * Sets the authentication status of the user.
+         * @param {Object} state The current state of the store.
+         * @param {boolean} isAuthenticated The authentication status to set.
+         */
         setIsAuthenticated(state, isAuthenticated) {
             state.isAuthenticated = isAuthenticated;
         },
+        /**
+         * Saves the user cards in the state.
+         * @param {Object} state The current state of the store.
+         * @param {Array} cards The cards to set.
+         */
         setCards(state, cards) {
             state.cards = cards;
         }
     },
     actions: {
+        /**
+         * Asynchronous action to log in the user.
+         * @param {Object} context Provides commit function to trigger mutations.
+         * @param {Object} payload Contains username and password for login.
+         * @returns {Object} Result of the login attempt including success status and message.
+         */
         async loginVuex({commit}, {username, password}) {
             try {
                 const response = await fetch('/login', {
@@ -44,27 +80,33 @@ export default createStore({
                     body: JSON.stringify({username, password})
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Response text:', data);
+                const data = await response.json();
 
+                if (response.ok) {
                     if (data.success) {
                         commit('setLoginState', {isLoggedIn: true, isAuthenticated: false});
                         commit('setUsername', username);
-                        return {success: true};
+                        return {success: true, message: 'Login successful'};
                     } else {
-                        return {error: data.message};
+                        // Considered successful HTTP request but logical error (e.g., wrong credentials)
+                        return {success: false, message: data.message, statusCode: response.status};
                     }
                 } else {
-                    const data = await response.json();
-                    return {error: data.message};
+                    // HTTP request failed
+                    return {success: false, message: data.message, statusCode: response.status};
                 }
             } catch (error) {
                 console.error('Network error:', error);
-                return {success: false, error: 'Network error'};
+                // Network error or other issue preventing the request from completing
+                return {success: false, message: 'Network error', statusCode: 0}; // statusCode 0 for network errors
             }
         },
 
+        /**
+         * Asynchronous action to authenticate the user.
+         * @param {Object} commit Provides commit function to trigger mutations.
+         * @returns {Object} Result of the authentication attempt including success status and message.
+         */
         async authenticateVuex({commit}) {
             try {
                 const response = await axios.post('/authenticate', {
@@ -89,6 +131,12 @@ export default createStore({
             }
         },
 
+        /**
+         * Fetches cards from the server if the user is authenticated.
+         * If the user is authenticated, it sends a GET request to the '/cards' endpoint.
+         * Upon successful response, it commits the fetched cards to the state.
+         * @param {Object} context - The Vuex action context, providing access to commit mutations and state.
+         */
         async fetchCardsVuex({commit, state}) {
             console.log('Fetching cards');
             if (state.isAuthenticated) {
@@ -112,6 +160,12 @@ export default createStore({
             }
         },
 
+        /**
+         * Toggles the application theme between 'dark' and 'light'.
+         * This action toggles the theme and commits the new theme to the state.
+         * It also updates the theme in localStorage and applies the corresponding class to the body.
+         * @param {Object} context - The Vuex action context, providing access to commit mutations and state.
+         */
         toggleThemeVuex({commit, state}) {
             const newTheme = state.theme === 'dark' ? 'light' : 'dark';
             commit('toggleTheme', newTheme); // Commit mutation to update theme in the store
@@ -119,6 +173,13 @@ export default createStore({
             document.body.className = newTheme === 'dark' ? 'dark-mode' : ''; // Update body class
         },
 
+        /**
+         * Logs out the current user.
+         * This action sends a POST request to the '/logout' endpoint.
+         * Upon successful response, it commits mutations to update the login state and clear user information.
+         * If the request fails, it logs the error and rejects the promise.
+         * @returns {Promise} A promise that resolves if logout is successful, otherwise rejects with an error message.
+         */
         logoutVuex({commit}) {
             return new Promise((resolve, reject) => {
                 axios.post('/logout').then(response => {
@@ -138,6 +199,12 @@ export default createStore({
             });
         },
 
+        /**
+         * Checks the authentication status of the user.
+         * This action sends a GET request to the '/checkAuthentication' endpoint.
+         * Based on the response, it commits mutations to update the login state accordingly.
+         * If the request fails, it logs the error.
+         */
         checkAuthenticationVuex({commit}) {
             axios.get('/checkAuthentication').then(response => {
                 if (response.data.success) {

@@ -18,15 +18,17 @@
   --link-color: #007BFF;
   --link-hover-color: #0056b3;
   --spinner-color: #000;
+  --header-background-color: #FFFFFF;
+  --header-border-color: #E0E0E0;
 }
 
 /* Dark Theme */
 body.dark-mode {
-  --background-color: #121212;
+  --background-color: #1A1A1A;
   --text-color: #E0E0E0;
-  --card-background-color: #1E1E1E;
+  --card-background-color: #242424;
   --card-text-color: #E0E0E0;
-  --card-border-color: #333333;
+  --card-border-color: #2E2E2E;
   --button-background-color: #0481fd;
   --button-text-color: #FFFFFF;
   --button-hover-background-color: #0060DF;
@@ -40,6 +42,8 @@ body.dark-mode {
   --link-color: #0A84FF;
   --link-hover-color: #0060DF;
   --spinner-color: #fff;
+  --header-background-color: #242424;
+  --header-border-color: #333333;
 }
 
 body {
@@ -106,6 +110,13 @@ button:hover {
   background-color: var(--button-hover-background-color);
   color: var(--button-hover-text-color);
 }
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 input {
   background-color: var(--input-background-color);
   color: var(--input-text-color);

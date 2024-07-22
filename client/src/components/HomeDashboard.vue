@@ -95,6 +95,7 @@ export default {
 }
 
 .main-card {
+  margin-top: 10px;
   max-width: calc(100% - 40px);
 }
 

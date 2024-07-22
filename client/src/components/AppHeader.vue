@@ -1,7 +1,6 @@
 <template>
   <header>
-    <button v-if="isLoggedIn" @click="logoutButtonClick">Logout</button>
-    <div v-else class="placeholder"></div>
+    <button :disabled="!isLoggedIn" @click="logoutButtonClick">Logout</button>
     <h1>Laboratory Vault</h1>
     <button @click="toggleDarkMode">
       {{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}
@@ -35,10 +34,10 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--card-background-color);
+  background-color: var(--header-background-color);
   color: var(--text-color);
-  border-bottom: 1px;
-  border-color: var(--card-border-color);
+  border-bottom: 2px;
+  border-color: var(--header-border-color);
 }
 
 header h1 {
@@ -46,12 +45,7 @@ header h1 {
   flex-grow: 1;
 }
 
-.placeholder {
-  width: 70px;
-  height: 20px;
-}
-
 button {
-  margin: 20px;
+  margin: 16px;
 }
 </style>
