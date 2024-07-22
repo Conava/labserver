@@ -37,6 +37,19 @@ check_ssl_certificates() {
     cd ../..
 }
 
+# Function to generate a .env file with a random SESSION_SECRET
+generate_env_file() {
+    echo "Generating .env file with a random SESSION_SECRET..."
+    if [[ ! -f .env ]]; then
+        # Using openssl to generate a random string for SESSION_SECRET
+        local secret=$(openssl rand -hex 32)
+        echo "SESSION_SECRET=$secret" > .env
+        echo ".env file created successfully."
+    else
+        echo ".env file already exists. Skipping creation."
+    fi
+}
+
 
 # Function to install packages on Debian
 install_debian() {
@@ -97,6 +110,7 @@ else
 fi
 
 check_ssl_certificates
+generate_env_file
 
 chmod +x server/server
 

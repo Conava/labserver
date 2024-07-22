@@ -64,7 +64,11 @@ export default {
       // Perform the desired action based on the action parameter
       if (action.startsWith('http')) {
         window.location.href = action;
-      } else {
+      }
+      else if (action.startsWith('/')) {
+        window.location.href = action;
+      }
+      else {
         // Handle other types of actions
         console.log('Action:', action);
       }
