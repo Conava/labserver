@@ -9,12 +9,13 @@ let db;
  * necessary table for storing user information.
  */
 function createDatabase() {
-    // Connect to SQLite database; create if it doesn't exist
-    db = new sqlite3.Database('./users.db', (err) => {
+    // Connect to SQLite database; create if doesn't exist
+    db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
         if (err) {
-            console.error(err.message);
+            console.error("Error connecting to database: ", err.message);
+            return;
         }
-        console.log('Connected to the users database.');
+        console.log('Database successfully created.');
     });
 
     // Create the users table with id, username, password, and objectPassphrase columns
@@ -26,9 +27,10 @@ function createDatabase() {
                 objectPassphrase TEXT
             )`, (err) => {
         if (err) {
-            console.error(err.message);
+            console.error("Error creating users table: ", err.message);
+            return;
         }
-        console.log('Users table created or already exists.');
+        console.log('Users table created.');
     });
 }
 

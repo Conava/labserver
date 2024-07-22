@@ -42,10 +42,12 @@ async function setupDatabase() {
     try {
         await fs.promises.access(path.join(__dirname, 'users.db'), fs.constants.F_OK);
         db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE);
-        console.log('Connected to the users database.');
+        console.log('Connected to existing users database.');
     } catch (err) {
         console.log('users.db does not exist. Initializing database and adding users...');
         initializeDatabase();
+        db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE);
+        console.log('Connected to new users database.');
     }
 }
 
@@ -283,6 +285,13 @@ function setupRoutes() {
      */
     app.post('/authenticate', function (req, res) {
         console.log("Authenticating...");
+
+        // If the logged-in user is admin, skip authentication
+        if (req.user.username === 'admin') {
+            console.log('User is admin, skipping authentication');
+            req.session.isAuthenticated = true;
+            return res.json({success: true});
+        }
         let coralIP;
         if (env === 'dev') {
             coralIP = 'localhost'; //use local Python coral emulator for testing
@@ -330,13 +339,6 @@ function setupRoutes() {
                     if (!row) {
                         console.log('User not found');
                         return res.status(401).json({success: false, message: 'User not found'});
-                    }
-
-                    // If the logged-in user is 'admin', grant access without checking the passphrase. For testing purposes only, username admin should be disabled in production.
-                    if (row.username === 'admin') {
-                        console.log('Access granted to admin');
-                        req.session.isAuthenticated = true;
-                        return res.json({success: true});
                     }
 
                     console.log('Passphrase:', response.data.passphrase);
@@ -417,16 +419,40 @@ async function startServer() {
     env = args.env || 'prod'; // Default to 'dev' if not specified
     const port = args.port || 3000; // Default to port 3000 if not specified
 
-    await setupDatabase();
-    setupMiddleware();
-    setupPassport();
-    setupRoutes();
+    console.log(`Attempting to start server with environment: ${env}, port: ${port}`);
 
-    // Decide to use HTTP or HTTPS based on the environment variable
-    const server = env === 'dev' ? http.createServer(app) : https.createServer(sslOptions, app);
+    try {
+        if (env === 'prod') {
+            // Check SSL certificate files
+            await fs.promises.access('certificates/key.pem', fs.constants.F_OK);
+            await fs.promises.access('certificates/cert.pem', fs.constants.F_OK);
+            console.log('SSL certificate files found.');
+        }
+    } catch (err) {
+        console.error('Error accessing SSL certificate files:', err);
+        return; // Stop execution if SSL files are missing
+    }
 
-    // Listen on the specified port
-    server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
+    try {
+        await setupDatabase();
+        setupMiddleware();
+        setupPassport();
+        setupRoutes();
+
+        const server = env === 'dev' ? http.createServer(app) : https.createServer(sslOptions, app);
+
+        server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
+
+        if (env === 'prod') {
+            // Redirect HTTP to HTTPS
+            http.createServer((req, res) => {
+                res.writeHead(301, {Location: `https://${req.headers.host}${req.url}`});
+                res.end();
+            }).listen(80);
+        }
+    } catch (error) {
+        console.error('Failed to start server:', error);
+    }
 }
 
 startServer().catch(console.error);
