@@ -42,10 +42,12 @@ async function setupDatabase() {
     try {
         await fs.promises.access(path.join(__dirname, 'users.db'), fs.constants.F_OK);
         db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE);
-        console.log('Connected to the users database.');
+        console.log('Connected to existing users database.');
     } catch (err) {
         console.log('users.db does not exist. Initializing database and adding users...');
         initializeDatabase();
+        db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE);
+        console.log('Connected to new users database.');
     }
 }
 
@@ -417,16 +419,31 @@ async function startServer() {
     env = args.env || 'prod'; // Default to 'dev' if not specified
     const port = args.port || 3000; // Default to port 3000 if not specified
 
-    await setupDatabase();
-    setupMiddleware();
-    setupPassport();
-    setupRoutes();
+    console.log(`Attempting to start server with environment: ${env}, port: ${port}`);
 
-    // Decide to use HTTP or HTTPS based on the environment variable
-    const server = env === 'dev' ? http.createServer(app) : https.createServer(sslOptions, app);
+    try {
+        if (env === 'prod') {
+            // Check SSL certificate files
+            await fs.promises.access('certificates/key.pem', fs.constants.F_OK);
+            await fs.promises.access('certificates/cert.pem', fs.constants.F_OK);
+            console.log('SSL certificate files found.');
+        }
+    } catch (err) {
+        console.error('Error accessing SSL certificate files:', err);
+        return; // Stop execution if SSL files are missing
+    }
 
-    // Listen on the specified port
-    server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
+    try {
+        await setupDatabase();
+        setupMiddleware();
+        setupPassport();
+        setupRoutes();
+
+        const server = env === 'dev' ? http.createServer(app) : https.createServer(sslOptions, app);
+        server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
+    } catch (error) {
+        console.error('Failed to start server:', error);
+    }
 }
 
 startServer().catch(console.error);
