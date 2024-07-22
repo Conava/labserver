@@ -1,0 +1,29 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - save
+
+variables:
+  IMAGE_NAME: my-webserver
+  IMAGE_TAG: $CI_COMMIT_REF_SLUG
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+  artifacts:
+    paths:
+      - docker/
+
+save:
+  stage: save
+  script:
+    - mkdir -p docker
+    - docker save $IMAGE_NAME:$IMAGE_TAG | gzip > docker/$IMAGE_NAME_$IMAGE_TAG.tar.gz
+  artifacts:
+    paths:
+      - docker/
