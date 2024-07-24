@@ -10,7 +10,7 @@ To use the Docker image from the GitLab repository, follow these steps:
 
 1. **Download the Docker image**:
 
-   Navigate to the `/dockerImages` folder in the GitLab repository and download the desired image with the naming pattern `labserver:<version>` (e.g., `labserver:v1.0.0`).
+   Navigate to the `/dockerImages` folder in the GitLab repository and download the desired image with the naming pattern `labserver:<version>` (e.g., `labserver-v1.0.0`).
 
 2. **Load the Docker image**:
 
