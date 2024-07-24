@@ -287,7 +287,7 @@ function setupRoutes() {
         console.log("Authenticating...");
 
         // If the logged-in user is admin, skip authentication
-        if (req.user.username === 'admin') {
+        if (req.user.username === 'admin' && env === 'dev') {
             console.log('User is admin, skipping authentication');
             req.session.isAuthenticated = true;
             return res.json({success: true});
@@ -411,9 +411,11 @@ function setupRoutes() {
  * `node server.js -e dev -p 3000` starts the server in development mode on port 3000.
  */
 async function startServer() {
+    // print the args
+    console.log(process.argv);
 
     // Parse command-line arguments for environment and port
-    const args = minimist(process.argv.slice(2), {alias: {e: 'env', p: 'port'}});
+    const args = minimist(process.argv.slice(2), {alias: { e: 'env', E: 'env', p: 'port', P: 'port' }});
 
     // Set environment and port from command-line arguments or use defaults
     env = args.env || 'prod'; // Default to 'dev' if not specified
@@ -443,13 +445,6 @@ async function startServer() {
 
         server.listen(port, () => console.log(`Server listening on port ${port} in ${env} mode`));
 
-        if (env === 'prod') {
-            // Redirect HTTP to HTTPS
-            http.createServer((req, res) => {
-                res.writeHead(301, {Location: `https://${req.headers.host}${req.url}`});
-                res.end();
-            }).listen(80);
-        }
     } catch (error) {
         console.error('Failed to start server:', error);
     }

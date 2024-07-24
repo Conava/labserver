@@ -199,6 +199,24 @@ Example:
 node server.js -P 443 -E prod
 ```
 
+## Access the website
+
+If run locally, open a web browser and navigate to the following URL:
+Deafault Port is 3000
+
+Dev Environment:
+```
+http://localhost:<port>
+```
+
+Prod Environment:
+Sometimes its necessary to specify the https:// in front of the URL to access the website
+You also might need to accept the self-signed certificate in the browser
+```
+https://localhost:<port>
+```
+
+Replace `3000` with the port number specified during the server start.
 
 ## Development
 
@@ -212,6 +230,7 @@ Differences between the development and production environments:
 - HTTP instead of HTTPS
 - Deactivated security features
 - Availability of the dev/emulateCoral.py script to emulate the Coral device
+- Username: admin / Password: nimda credentials skip the authentication process
 
 Start the development UI
 
