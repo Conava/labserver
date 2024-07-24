@@ -1,6 +1,12 @@
 # Use an official Node runtime as a parent image
 FROM node:14
 
+# Navigate to the project root
+WORKDIR /usr/src/app
+
+# Copy the README.md from the project root
+COPY README.md .
+
 # Create a directory for the client application
 WORKDIR /usr/src/app/client
 
