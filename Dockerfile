@@ -47,4 +47,4 @@ RUN if [ ! -f .env ]; then \
 EXPOSE 3000
 
 # Command to run the server
-CMD ["node",  "server.js", "-e", "prod", "-p", "3000"]
+CMD ["sh", "-c", "node server.js -e ${NODE_ENV:-prod} -p 3000"]

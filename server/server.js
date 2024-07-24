@@ -411,9 +411,6 @@ function setupRoutes() {
  * `node server.js -e dev -p 3000` starts the server in development mode on port 3000.
  */
 async function startServer() {
-    // print the args
-    console.log(process.argv);
-
     // Parse command-line arguments for environment and port
     const args = minimist(process.argv.slice(2), {alias: { e: 'env', E: 'env', p: 'port', P: 'port' }});
 

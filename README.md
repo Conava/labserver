@@ -16,17 +16,30 @@ To use the Docker image from the GitLab repository, follow these steps:
 
    After downloading the image, you can load it into Docker using the following command:
    ```sh
-   docker load -i /path/to/labserver:<version>.tar.gz
+   docker load -i /path/to/labserver:<version>.tar
     ```
     Replace `/path/to/labserver:<version>.tar.gz` with the path to the downloaded image.
 
 3. **Run the Docker container**:
    After loading the image, you can run the Docker container using the following command:
    ```sh
-   docker run -d -p <path>:3000 --name labserver labserver:<version>
+   docker run -p <path>:3000 labserver:<version>
    ```
-   Replace `<path>` with the desired port number. Recommended: 443
-   
+    Replace `<path>` with the desired port number. Recommended: 443
+
+4. **More options**:
+    - (Optional Parameter) --name <containerName>
+      Replace `<containerName>` with any desired name for the container.
+    - (Optional Parameter) -d
+      Use the `-d` flag to run the container in the background.
+    - (Optional Parameter) -e NODE_ENV=dev
+      Set the environment to development. Default: production
+
+##### Example:
+```sh
+docker run -e NODE_ENV=dev -d -p 443:3000 --name labserver labserver:v1.0.0
+```
+
 
 #### Build from source code
 
@@ -36,23 +49,38 @@ To build the Docker image from the source code, follow these steps:
 
    Clone the repository to your local machine using the following command:
    ```sh
-   git clone https://gitlab.com/CorAL-Lab/coral-webserver.git
+   git clone https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver.git
    ```
    
 2. **Build the Docker image**:
 
     Navigate to the repository and build the Docker image using the following command:
     ```sh
-    docker build -t labserver:<version> .
+    docker build -t <imageName>:<version> .
     ```
+    Replace `<imageName>` with any desired name for the image.
     Replace `<version>` with the desired version number.
 
 3. **Run the Docker container**: 
     After building the image, you can run the Docker container using the following command:
     ```sh
-    docker run -d -p <path>:3000 --name labserver labserver:<version>
+    docker run -p <path>:3000 <imageName>:<version>
     ```
+    Replace `<imageName>` with the name of the image.
     Replace `<path>` with the desired port number. Recommended: 443
+
+4. **More options**:
+    - (Optional Parameter) --name <containerName> 
+            Replace `<containerName>` with any desired name for the container.
+    - (Optional Parameter) -d 
+            Use the `-d` flag to run the container in the background.
+    - (Optional Parameter) -e NODE_ENV=dev
+            Set the environment to development. Default: production
+
+##### Example:
+```sh
+docker run -e NODE_ENV=dev -d -p 443:3000 --name labserver labserver:v1.0.0
+```
 
 
 #### Managing the Docker container
@@ -61,35 +89,35 @@ After running the Docker container, you can manage it using the following comman
 
 - **Start the container**:
     ```sh
-    docker start labserver
+    docker start <containerName>
     ```
 - **Stop the container**:
     ```sh
-    docker stop labserver
+    docker stop <containerName>
     ```
 - **Remove the container**:
     ```sh
-    docker rm labserver
+    docker rm <containerName>
     ```
 - **Remove the image**:
     ```sh
-    docker rmi labserver:<version>
+    docker rmi <imageName>:<version>
     ```
     Replace `<version>` with the desired version number.
 - **Access the container**:
     ```sh
-    docker exec -it labserver bash
+    docker exec -it <containerName> bash
     ```
 - **Save an image**:
     ```sh
-    docker save -o /path/to/labserver:<version>.tar labserver:<version>
+    docker save -o /path/to/<imageName>:<version>.tar <imageName>:<version>
     ```
-    Replace `/path/to/labserver:<version>.tar` with the desired path and filename.
+    Replace `/path/to/<imageName>:<version>.tar` with the desired path and filename.
 - **Load an image**:
     ```sh
-    docker load -i /path/to/labserver:<version>.tar
+    docker load -i /path/to/<imageName>:<version>.tar
     ```
-    Replace `/path/to/labserver:<version>.tar` with the path to the downloaded image.
+    Replace `/path/to/<imageName>:<version>.tar` with the path to the desired image.
 
 
 ### Use install script (Linux and macOS only)
@@ -100,7 +128,7 @@ Clone the repository to your local machine using the following command:
 
 
    ```sh
-  git clone https://gitlab.com/CorAL-Lab/coral-webserver.git
+  git clone https://git.informatik.uni-hamburg.de/base.camp/teaching/bsc-proj-basecamp-sose-2024/2-laboratory/webserver.git
    ```
 
 #### Run the installation script
@@ -202,7 +230,6 @@ node server.js -P 443 -E prod
 ## Access the website
 
 If run locally, open a web browser and navigate to the following URL:
-Deafault Port is 3000
 
 Dev Environment:
 ```
@@ -216,7 +243,7 @@ You also might need to accept the self-signed certificate in the browser
 https://localhost:<port>
 ```
 
-Replace `3000` with the port number specified during the server start.
+Replace <port> with the port number specified during the server start. Default is 3000
 
 ## Development
 
@@ -224,6 +251,12 @@ To start the development server, run the following commands in the client direct
 
 ```sh
 ./server start -E dev
+```
+
+OR via docker
+
+```sh
+docker run -e NODE_ENV=dev -d -p <port>:3000 --name <containerName> <imageName>:<version>
 ```
 
 Differences between the development and production environments:
