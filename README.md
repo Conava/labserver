@@ -73,12 +73,42 @@ To build the Docker image from the source code, follow these steps:
     - (Optional Parameter) -e NODE_ENV=dev
             Set the environment to development. Default: production
 
-5. **OPTIONAL: Build Multi-platform image and push do dockerhub**:
+5. OPTIONAL: Build Multi-platform image and push to DockerHub
+   
+    Preparation: Install buildx and tonistiigi/binfmt 
+    Install qemu-user-static:
     ```sh
-    docker buildx build --platform linux/amd64,linux/arm64 -t conava/labserver:<version> --push .
-    ```
-   Multi-platform image must be pushed to dockerhub, it cannot be loaded into docker directly.
+   docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+   ```
+   
+   Install tonistiigi/binfmt:  
 
+    ```sh 
+   docker run --privileged --rm tonistiigi/binfmt --install all
+    ```
+   Restart Docker to apply changes.
+
+   Build and Push Multi-platform Image
+   Create a new buildx builder:  
+    ```sh
+   docker buildx create --name multiPlatformBuilder
+   ```
+   
+   Use the newly created builder:  
+    ```sh
+   docker buildx use multiPlatformBuilder
+   ```
+   
+   Inspect and bootstrap the builder:  
+    ```sh
+   docker buildx inspect --bootstrap
+   ```
+   
+   Build and push the multi-platform image:  
+    ```sh
+   docker buildx build --platform linux/amd64,linux/arm64 -t conava/labserver:<version> --push .
+   ```
+   Note: Multi-platform images must be pushed to DockerHub; they cannot be loaded into Docker directly.
 
 ##### Example:
 ```sh
