@@ -27,4 +27,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/your-image-name:${{ github.ref_name }}
+        tags: ${{ secrets.DOCKER_USERNAME }}/labserver:${{ github.ref_name }}
