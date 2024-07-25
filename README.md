@@ -4,30 +4,26 @@
 
 ### Use docker
 
-#### Install from GitLab
+#### Install from DockerHub
 
 To use the Docker image from the GitLab repository, follow these steps:
 
 1. **Download the Docker image**:
 
-   Navigate to the `/dockerImages` folder in the GitLab repository and download the desired image with the naming pattern `labserver:<version>` (e.g., `labserver-v1.0.0`).
-
-2. **Load the Docker image**:
-
-   After downloading the image, you can load it into Docker using the following command:
+   Download the Docker imgage from DockerHub using the following command:
    ```sh
-   docker load -i /path/to/labserver:<version>.tar
+    docker pull --platform <platform> conava/labserver:<version>
     ```
-    Replace `/path/to/labserver:<version>.tar.gz` with the path to the downloaded image.
 
-3. **Run the Docker container**:
+
+2**Run the Docker container**:
    After loading the image, you can run the Docker container using the following command:
    ```sh
    docker run -p <path>:3000 labserver:<version>
    ```
     Replace `<path>` with the desired port number. Recommended: 443
 
-4. **More options**:
+3**More options**:
     - (Optional Parameter) --name <containerName>
       Replace `<containerName>` with any desired name for the container.
     - (Optional Parameter) -d
@@ -76,6 +72,13 @@ To build the Docker image from the source code, follow these steps:
             Use the `-d` flag to run the container in the background.
     - (Optional Parameter) -e NODE_ENV=dev
             Set the environment to development. Default: production
+
+5. **OPTIONAL: Build Multi-platform image and push do dockerhub**:
+    ```sh
+    docker buildx build --platform linux/amd64,linux/arm64 -t conava/labserver:<version> --push .
+    ```
+   Multi-platform image must be pushed to dockerhub, it cannot be loaded into docker directly.
+
 
 ##### Example:
 ```sh

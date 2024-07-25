@@ -16,9 +16,9 @@ COPY client/package*.json ./
 # Install client dependencies
 RUN npm install
 
-# Build the Vue application
+# Build the Vue application with retry logic
 COPY client/ .
-RUN npm run build
+RUN npm run build || npm run build || npm run build
 
 # Navigate to the server directory
 WORKDIR /usr/src/app/server
