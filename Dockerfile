@@ -1,5 +1,12 @@
 # Use an official Node runtime as a parent image
-FROM node:20
+FROM node:20-bullseye-slim
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Navigate to the project root
 WORKDIR /usr/src/app
@@ -43,8 +50,15 @@ RUN if [ ! -f .env ]; then \
         openssl rand -hex 32 | awk '{print "SESSION_SECRET="$1}' > .env; \
     fi
 
+# Copy the update script
+COPY update_and_run_docker.sh /usr/src/app/update_and_run_docker.sh
+RUN chmod +x /usr/src/app/update_and_run_docker.sh
+
+# Set up a cron job to run the update script every hour
+RUN echo "0 * * * * /usr/src/app/update_and_run_docker.sh" >> /etc/crontabs/root
+
 # Expose the port the server listens on
 EXPOSE 3000
 
 # Command to run the server
-CMD ["sh", "-c", "node server.js -e ${NODE_ENV:-prod} -p 3000"]
+CMD ["sh", "-c", "crond && node server.js -e ${NODE_ENV:-prod} -p 3000"]
