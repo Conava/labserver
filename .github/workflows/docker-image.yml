@@ -28,3 +28,4 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/labserver:${{ github.ref_name }}
+        platforms: linux/amd64,linux/arm64
