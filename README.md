@@ -1,4 +1,5 @@
 # coral-webserver
+Guide for version 1.1.0
 
 ## Installation 
 
@@ -10,18 +11,24 @@ To use the Docker image from the GitLab repository, follow these steps:
 
 1. **Download the Docker image**:
 
-   Download the Docker imgage from DockerHub using the following command:
+   Download the Docker image from DockerHub using the following command:
    ```sh
-    docker pull --platform <platform> conava/labserver:<version>
+    docker pull conava/labserver:<version>
     ```
+   Images are available for the following platforms:
+    - linux/amd64
+    - linux/arm64
+
+    Replace `<version>` with the desired version number. A list of available versions can be found on the [DockerHub page](https://hub.docker.com/repository/docker/conava/labserver).
+    Docker images are automatically built and pushed to DockerHub when a new release is created
 
 
 2**Run the Docker container**:
    After loading the image, you can run the Docker container using the following command:
    ```sh
-   docker run -p <path>:3000 labserver:<version>
+   docker run -p <port>:3000 labserver:<version>
    ```
-    Replace `<path>` with the desired port number. Recommended: 443
+    Replace `<port>` with the desired port number. Recommended: 443
 
 3**More options**:
     - (Optional Parameter) --name <containerName>
@@ -29,11 +36,11 @@ To use the Docker image from the GitLab repository, follow these steps:
     - (Optional Parameter) -d
       Use the `-d` flag to run the container in the background.
     - (Optional Parameter) -e NODE_ENV=dev
-      Set the environment to development. Default: production
+      Set the environment to development. Default: prod (production)
 
 ##### Example:
 ```sh
-docker run -e NODE_ENV=dev -d -p 443:3000 --name labserver labserver:v1.0.0
+docker run -e NODE_ENV=dev -d -p 443:3000 --name labserver labserver:v1.1.0
 ```
 
 
@@ -60,10 +67,10 @@ To build the Docker image from the source code, follow these steps:
 3. **Run the Docker container**: 
     After building the image, you can run the Docker container using the following command:
     ```sh
-    docker run -p <path>:3000 <imageName>:<version>
+    docker run -p <port>:3000 <imageName>:<version>
     ```
     Replace `<imageName>` with the name of the image.
-    Replace `<path>` with the desired port number. Recommended: 443
+    Replace `<port>` with the desired port number. Recommended: 443
 
 4. **More options**:
     - (Optional Parameter) --name <containerName> 
@@ -75,45 +82,43 @@ To build the Docker image from the source code, follow these steps:
 
 5. OPTIONAL: Build Multi-platform image and push to DockerHub
    
-    Preparation: Install buildx and tonistiigi/binfmt 
-    Install qemu-user-static:
-    ```sh
-   docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-   ```
-   
-   Install tonistiigi/binfmt:  
+    Preparation: Install qemu, buildx and tonistiigi/binfmt 
 
-    ```sh 
-   docker run --privileged --rm tonistiigi/binfmt --install all
-    ```
-   Restart Docker to apply changes.
+    - Install qemu-user-static:
+      ```sh
+      docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      ```
+   
+   - Install tonistiigi/binfmt:
+      ```sh 
+      docker run --privileged --rm tonistiigi/binfmt --install all
+      ```
+     
+   - Restart Docker to apply changes.
 
-   Build and Push Multi-platform Image
-   Create a new buildx builder:  
-    ```sh
-   docker buildx create --name multiPlatformBuilder
-   ```
+   - Create a new buildx builder:  
+     ```sh
+     docker buildx create --name multiPlatformBuilder
+     ```
    
-   Use the newly created builder:  
-    ```sh
-   docker buildx use multiPlatformBuilder
-   ```
+   - Use the newly created builder:  
+     ```sh
+     docker buildx use multiPlatformBuilder
+     ```
    
-   Inspect and bootstrap the builder:  
-    ```sh
-   docker buildx inspect --bootstrap
-   ```
+   - Inspect and bootstrap the builder:  
+     ```sh
+     docker buildx inspect --bootstrap
+     ```
    
-   Build and push the multi-platform image:  
-    ```sh
-   docker buildx build --platform linux/amd64,linux/arm64 -t conava/labserver:<version> --push .
-   ```
-   Note: Multi-platform images must be pushed to DockerHub; they cannot be loaded into Docker directly.
-
-##### Example:
-```sh
-docker run -e NODE_ENV=dev -d -p 443:3000 --name labserver labserver:v1.0.0
-```
+   - Build and push the multi-platform image:  
+     ```sh
+     docker buildx build --platform linux/amd64,linux/arm64 -t <repository>:<version> --push .
+     ```
+     Replace `<repository>` with the desired repository name and `<version>` with the desired version number.
+   
+     Note: Multi-platform images must be pushed to DockerHub; they cannot be loaded into Docker directly.
+     They can be pulled from dockerhub as stated in the previous section.
 
 
 #### Managing the Docker container
@@ -141,12 +146,12 @@ After running the Docker container, you can manage it using the following comman
     ```sh
     docker exec -it <containerName> bash
     ```
-- **Save an image**:
+- **Save an image to archive**:
     ```sh
     docker save -o /path/to/<imageName>:<version>.tar <imageName>:<version>
     ```
     Replace `/path/to/<imageName>:<version>.tar` with the desired path and filename.
-- **Load an image**:
+- **Load an image from archive**:
     ```sh
     docker load -i /path/to/<imageName>:<version>.tar
     ```
